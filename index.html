@@ -69,6 +69,8 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 28px;background:var(--ink);color:var(--bg);text-decoration:none;border-radius:8px;font-weight:500}
 .btn:hover{opacity:.9}
 .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.copy{font:inherit;font-size:13px;min-height:36px;padding:0 12px;margin:0 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.addr a{color:var(--ink)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -125,11 +127,33 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
   <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfSooh1vyvAHNRhriAm53fbbXh2V10FCq_NBFIk3cGHAqWCug/viewform?embedded=true" title="お問い合わせフォーム" loading="lazy">読み込んでいます…</iframe>
   <p class="alt"><a href="https://docs.google.com/forms/d/e/1FAIpQLSfSooh1vyvAHNRhriAm53fbbXh2V10FCq_NBFIk3cGHAqWCug/viewform" target="_blank" rel="noopener noreferrer">フォームが表示されない場合は、こちらを開いてください</a></p>
 </section> -->
-<section class="contact" id="contact">
+<!-- <section class="contact" id="contact">
   <h2>お問い合わせ</h2>
   <p>お問い合わせは、下のボタンからフォームにお進みください。お預かりした情報は、お問い合わせへの返信のみに使います。</p>
   <p class="btn-wrap"><a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSfSooh1vyvAHNRhriAm53fbbXh2V10FCq_NBFIk3cGHAqWCug/viewform" target="_blank" rel="noopener noreferrer">お問い合わせフォームを開く</a></p>
+</section> -->
+<section class="contact" id="contact">
+  <h2>お問い合わせ</h2>
+  <p>お問い合わせは、メールでお送りください。お預かりした情報は、お問い合わせへの返信のみに使います。</p>
+  <p class="btn-wrap"><a class="btn" id="mail" href="#">メールで問い合わせる</a></p>
+  <p class="addr">メールアプリが開かない場合は、<span id="addr"></span> 宛にお送りください。
+    <button type="button" class="copy" id="copy">コピー</button>
+    <a id="gmail" href="#" target="_blank" rel="noopener noreferrer">Gmailで開く</a></p>
 </section>
+<script>
+(function(){
+  var u="chungkyuhum",d="gmail.com";
+  var a=u+"@"+d,s="九星気学サイトからのお問い合わせ",b="お名前：\r\nお問い合わせ内容：\r\n";
+  var q="subject="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
+  document.getElementById("mail").href="mailto:"+a+"?"+q;
+  document.getElementById("gmail").href="https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(a)+"&su="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
+  document.getElementById("addr").textContent=a;
+  var c=document.getElementById("copy");
+  c.onclick=function(){
+    if(navigator.clipboard){navigator.clipboard.writeText(a).then(function(){c.textContent="コピーしました"},function(){c.textContent="コピーできませんでした"})}
+  };
+})();
+</script>
 </main>
 
 <script src="xlsx.mini.min.js"></script>
