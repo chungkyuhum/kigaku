@@ -72,91 +72,58 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .copy{font:inherit;font-size:13px;min-height:36px;padding:0 12px;margin:0 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
 .addr a{color:var(--ink)}
 .yr{list-style:none;margin:0;padding:0}.yr li{display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line)}.yr li.now{background:var(--accent-bg);font-weight:500}.yr .mo{width:3em}.yr .pl{width:2em;color:var(--sub)}
+.priv{font-size:13px;color:var(--sub);margin:0 0 12px}
 [hidden]{display:none!important}
 </style>
 </head>
 <body>
 <main>
-<h1>九星気学 運勢・相性診断</h1>
-<p class="lead">生年月日から本命星と月命星を割り出し、今年・今月の運勢と吉方位、二人の相性を調べます。</p>
+<h1 data-t="h1"></h1>
+<p class="lead" data-t="lead"></p>
 
 <div id="hero"></div>
 
 <div class="tabs" role="tablist">
-  <button role="tab" id="t1" aria-selected="true" aria-controls="p1">運勢</button>
-  <button role="tab" id="t2" aria-selected="false" aria-controls="p2">相性</button>
+  <button role="tab" id="t1" aria-selected="true" aria-controls="p1" data-t="tab1"></button>
+  <button role="tab" id="t2" aria-selected="false" aria-controls="p2" data-t="tab2"></button>
 </div>
 
 <section id="p1" role="tabpanel" aria-labelledby="t1">
-  <fieldset><legend>あなた</legend>
+  <fieldset><legend data-t="legend_you"></legend>
     <div class="row">
-      <label>お名前（任意）<input type="text" id="n1" maxlength="20" autocomplete="off"></label>
-      <label>生年月日<input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
-      <label>性別<select id="g1"><option value="m">男性</option><option value="f">女性</option></select></label>
+      <label><span data-t="lbl_name"></span><input type="text" id="n1" maxlength="20" autocomplete="off"></label>
+      <label><span data-t="lbl_birth"></span><input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
+      <label><span data-t="lbl_gender"></span><select id="g1"><option value="m" data-t="opt_m"></option><option value="f" data-t="opt_f"></option></select></label>
     </div>
   </fieldset>
-  <p style="font-size:13px;color:var(--sub);margin:0 0 12px">入力した名前や生年月日は、保存も送信もされません。</p>
-  <button class="go" id="b1">鑑定する</button>
+  <p class="priv" data-t="privacy"></p>
+  <button class="go" id="b1" data-t="btn_fortune"></button>
   <div class="res" id="r1" aria-live="polite"></div>
 </section>
 
 <section id="p2" role="tabpanel" aria-labelledby="t2" hidden>
-  <fieldset><legend>あなた</legend>
+  <fieldset><legend data-t="legend_you"></legend>
     <div class="row">
-      <label>生年月日<input type="date" id="d2" min="1901-01-01" max="2099-12-31"></label>
-      <label>性別<select id="g2"><option value="m">男性</option><option value="f">女性</option></select></label>
+      <label><span data-t="lbl_birth"></span><input type="date" id="d2" min="1901-01-01" max="2099-12-31"></label>
+      <label><span data-t="lbl_gender"></span><select id="g2"><option value="m" data-t="opt_m"></option><option value="f" data-t="opt_f"></option></select></label>
     </div>
   </fieldset>
-  <fieldset><legend>お相手</legend>
+  <fieldset><legend data-t="legend_partner"></legend>
     <div class="row">
-      <label>生年月日<input type="date" id="d3" min="1901-01-01" max="2099-12-31"></label>
-      <label>性別<select id="g3"><option value="f">女性</option><option value="m">男性</option></select></label>
+      <label><span data-t="lbl_birth"></span><input type="date" id="d3" min="1901-01-01" max="2099-12-31"></label>
+      <label><span data-t="lbl_gender"></span><select id="g3"><option value="f" data-t="opt_f"></option><option value="m" data-t="opt_m"></option></select></label>
     </div>
   </fieldset>
-  <button class="go" id="b2">相性を見る</button>
+  <button class="go" id="b2" data-t="btn_compat"></button>
   <div class="res" id="r2" aria-live="polite"></div>
 </section>
 
-<!-- <p class="note">節入り日は計算式で求めています（年によってずれる場合は content.xlsx の「節入り補正」シートで補正できます）。節入りの時刻までは考慮していないため、節入り当日生まれの方は結果が前後することがあります。結果は伝統的な解釈にもとづく読み物で、娯楽としてお楽しみください。</p> -->
-<!-- <p class="sns">
-  <a href="https://www.instagram.com/seiji_godairiki/" target="_blank" rel="noopener noreferrer">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-    Instagram
-  </a>
-</p> -->
-<!-- <section class="contact" id="contact">
-  <h2>お問い合わせ</h2>
-  <p>お問い合わせは、下のフォームからお送りください。お預かりした情報は、お問い合わせへの返信のみに使います。</p>
-  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfSooh1vyvAHNRhriAm53fbbXh2V10FCq_NBFIk3cGHAqWCug/viewform?embedded=true" title="お問い合わせフォーム" loading="lazy">読み込んでいます…</iframe>
-  <p class="alt"><a href="https://docs.google.com/forms/d/e/1FAIpQLSfSooh1vyvAHNRhriAm53fbbXh2V10FCq_NBFIk3cGHAqWCug/viewform" target="_blank" rel="noopener noreferrer">フォームが表示されない場合は、こちらを開いてください</a></p>
-</section> -->
-<!-- <section class="contact" id="contact">
-  <h2>お問い合わせ</h2>
-  <p>お問い合わせは、下のボタンからフォームにお進みください。お預かりした情報は、お問い合わせへの返信のみに使います。</p>
-  <p class="btn-wrap"><a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSfSooh1vyvAHNRhriAm53fbbXh2V10FCq_NBFIk3cGHAqWCug/viewform" target="_blank" rel="noopener noreferrer">お問い合わせフォームを開く</a></p>
-</section> -->
 <section class="contact" id="contact">
-  <h2>お問い合わせ</h2>
-  <!-- <p>お問い合わせは、メールでお送りください。お預かりした情報は、お問い合わせへの返信のみに使います。</p> -->
-  <p class="btn-wrap"><a class="btn" id="mail" href="#">メールで問い合わせる</a></p>
-  <!-- <p class="addr">メールアプリが開かない場合は、<span id="addr"></span> 宛にお送りください。
-    <button type="button" class="copy" id="copy">コピー</button>
-    <a id="gmail" href="#" target="_blank" rel="noopener noreferrer">Gmailで開く</a></p> -->
+  <h2 data-t="contact_h"></h2>
+  <p data-t="contact_text"></p>
+  <p class="btn-wrap"><a class="btn" id="mail" href="#" data-t="contact_btn"></a></p>
 </section>
-<script>
-(function(){
-  var u="takei.seiji792",d="gmail.com";
-  var a=u+"@"+d,s="九星気学サイトからのお問い合わせ",b="お名前：\r\nお問い合わせ内容：\r\n";
-  var q="subject="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
-  document.getElementById("mail").href="mailto:"+a+"?"+q;
-  document.getElementById("gmail").href="https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(a)+"&su="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
-  document.getElementById("addr").textContent=a;
-  var c=document.getElementById("copy");
-  c.onclick=function(){
-    if(navigator.clipboard){navigator.clipboard.writeText(a).then(function(){c.textContent="コピーしました"},function(){c.textContent="コピーできませんでした"})}
-  };
-})();
-</script>
+<p class="note" data-t="disclaimer"></p>
 </main>
 
 <script src="xlsx.mini.min.js"></script>
@@ -172,7 +139,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI;
+let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "lbl_gender", "opt_m", "opt_f", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const a=CT[m-1],Y=y<=2000?y-1900:y-2000;
@@ -195,10 +162,12 @@ function board(pl,me,bad){
     return `<div class="cell${me===s?" me":""}${bad&&bad.includes(p)?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span></div>`}).join("")+"</div>";
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const t=(k,o)=>String(T[k]??"").replace(/\{(\w+)\}/g,(m,x)=>o&&x in o?o[x]:m);
+const tx=(k,o)=>esc(t(k,o));
 function fortune(){
   const v=$("d1").value,out=$("r1");
   if(!C)return;
-  if(!v){out.innerHTML='<p class="err">生年月日を入力してください。</p>';return}
+  if(!v){out.innerHTML=`<p class="err">${tx("err_birth")}</p>`;return}
   const nm=$("n1").value.trim().slice(0,20);
   const [y,m,d]=v.split("-").map(Number),g=$("g1").value,{by,i}=info(y,m,d),s=sum(by);
   const n=wrap(g==="m"?11-s:s+4),mn=monthStar(by,i),st=ST(n),ms=ST(mn);
@@ -206,35 +175,42 @@ function fortune(){
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const bad=[five,anken,honSat,honTeki].filter(x=>x&&x!=="中");
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===st.el||GEN[ST(pl[p]).el]===st.el));
-  const mpl=place(monthStar(BY,TI)),mpos=find(mpl,n),mf=C.yearly.palaceMonth[mpos];
-  const cats=C.categories.map(c=>`<div class="card"><h3>${esc(c.name)}（${BY}年）</h3><p>${esc(c.text[pos])}</p></div>`).join("");
+  const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");
+  const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),n);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
-  $("hero").innerHTML=board(pl,n,bad)+`<p class="cap">${BY}年の年盤（点線は凶方位）</p>`;
-  out.innerHTML=`<h2>${nm?esc(nm)+"さんの鑑定":"鑑定結果"}</h2>
-  <div class="card"><h3>本命星：<span data-e="${st.el}">${st.name}</span></h3><p>${st.text}</p></div>
-  <div class="card"><h3>月命星：<span data-e="${ms.el}">${ms.name}</span></h3><p>本命星が社会での顔、月命星は内面の性質とされます。内面では次の傾向があります。${ms.text}</p></div>
-  <div class="card"><h3>${BY}年の運勢：${pos}に入る「${f.t}」 <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
+  $("hero").innerHTML=board(pl,n,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
+  out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
+  <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${st.el}">${st.name}</span></h3><p>${st.text}</p></div>
+  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${ms.el}">${ms.name}</span></h3><p>${tx("getsumei_note")}${ms.text}</p></div>
+  <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
-  <div class="card"><h3>今年の吉方位</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):"今年は目立った吉方位がありません。"}</p>
-  <p style="font-size:14px;color:var(--sub);margin-top:6px">あなたの星を生む、または同じ五行の星が入る方位です。</p></div>
-  <div class="card"><h3>避けたい方位</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||"なし"}</p>
-  <p style="font-size:14px;color:var(--sub);margin-top:6px">五黄殺${anken?"・暗剣殺":""}${honSat?"・本命殺・本命的殺":""}にあたる方位です。</p></div>
-  <div class="card"><h3>${BY}年の月ごとの運勢</h3><ul class="yr">${yr}</ul>
-  <p style="font-size:13px;color:var(--sub);margin-top:6px">色の付いた行が今月です。方位は、あなたの星が入る月盤の位置です。</p></div>`;
+  <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
+  <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
+  <div class="card"><h3>${tx("h_bad")}</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||tx("bad_none")}</p>
+  <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("bad_note",{names:names.join("・")})}</p></div>
+  <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
+  <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>`;
 }
 function honmei(v,g){const [y,m,d]=v.split("-").map(Number),s=sum(info(y,m,d).by);return wrap(g==="m"?11-s:s+4)}
 function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
   if(!C)return;
-  if(!a||!b){out.innerHTML='<p class="err">二人の生年月日を入力してください。</p>';return}
+  if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
   const x=honmei(a,$("g2").value),y=honmei(b,$("g3").value),ex=ST(x).el,ey=ST(y).el;
   const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",r=C.fixed.relations[k];
-  out.innerHTML=`<h2><span data-e="${ex}">${ST(x).name}</span> と <span data-e="${ey}">${ST(y).name}</span></h2>
-  <div class="card"><div class="score">${r.score}<span style="font-size:18px"> 点</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
-  ${(x===5||y===5)?'<div class="card"><h3>五黄土星を含む組み合わせ</h3><p>五黄土星は個性が強く、相手に大きな影響を与えます。五行の関係だけでなく、お互いの主張を尊重する姿勢が大切です。</p></div>':""}
-  <div class="card"><h3>あなた（${ST(x).name}）</h3><p>${ST(x).text}</p></div>
-  <div class="card"><h3>お相手（${ST(y).name}）</h3><p>${ST(y).text}</p></div>
-  <p style="font-size:14px;color:var(--sub)">五行の相生・相剋にもとづく簡易判定です。点数は目安にとどめてください。</p>`;
+  out.innerHTML=`<h2><span data-e="${ex}">${ST(x).name}</span> ${tx("and")} <span data-e="${ey}">${ST(y).name}</span></h2>
+  <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
+  ${(x===5||y===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
+  <div class="card"><h3>${tx("h_you",{star:ST(x).name})}</h3><p>${ST(x).text}</p></div>
+  <div class="card"><h3>${tx("h_partner",{star:ST(y).name})}</h3><p>${ST(y).text}</p></div>
+  <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
+}
+function applyTexts(){
+  document.title=t("title");
+  document.querySelectorAll("[data-t]").forEach(e=>{const v=t(e.dataset.t);e.textContent=v;if(v==="")e.hidden=true});
+  const a=t("contact_mail");
+  if(a)$("mail").href="mailto:"+a+"?subject="+encodeURIComponent(t("contact_subject"))+"&body="+encodeURIComponent(t("contact_body").replace(/\r?\n/g,"\r\n"));
+  else $("contact").hidden=true;
 }
 $("b1").onclick=fortune;$("b2").onclick=compat;
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
@@ -267,6 +243,10 @@ function parse(wb){
   g("節入り補正").forEach((r,i)=>{if(blank(r.slice(0,3)))return;const[y,m,d]=r.slice(0,3).map(Number);
     if(!(y>=1901&&y<=2099&&m>=1&&m<=12&&d>=1&&d<=10&&[y,m,d].every(Number.isInteger)))E("節入り補正",i,"年・月・日を正しい数字で入れてください（日は節入りの日で1〜10）");
     else(ov[y]=ov[y]||{})[m]=d});
+  const T2={},tw=wb.Sheets["画面文言"];
+  if(!tw)errs.push("「画面文言」シートが見つかりません");
+  else{XLSX.utils.sheet_to_json(tw,{header:1,defval:""}).slice(1).forEach(r=>{const k=t(r[0]);if(k)T2[k]=String(r[1]??"").trim()});
+    KEYS.forEach(k=>{if(!(k in T2))errs.push(`「画面文言」シートに「${k}」の行がありません（A列に ${k} と書いた行が必要です）`)})}
   const cats=[],cw=wb.Sheets["運勢カテゴリ"];
   if(!cw)errs.push("「運勢カテゴリ」シートが見つかりません");
   else{const rows=XLSX.utils.sheet_to_json(cw,{header:1,defval:""}).map(r=>r.map(t)),head=rows[0]||[];
@@ -276,13 +256,13 @@ function parse(wb){
       PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
       cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,palaceYear:py,palaceMonth:pm}};
+  return{texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx").then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
-.then(b=>{C=parse(XLSX.read(b,{type:"array"}));
+.then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
-  $("hero").innerHTML=board(place(center(BY)),0)+`<p class="cap">${BY}年の年盤（各方位に入る九星）</p>`;
+  $("hero").innerHTML=board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
 }).catch(e=>{$("hero").innerHTML='<div class="card"><h3 class="err">データを読み込めません</h3>'+(Array.isArray(e)?e:["content.xlsx を読み込めませんでした。Webサーバー経由で開いているか確認してください"]).map(x=>`<p class="err">${x}</p>`).join("")+"</div>"});
 </script>
 </body>
