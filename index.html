@@ -71,6 +71,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .copy{font:inherit;font-size:13px;min-height:36px;padding:0 12px;margin:0 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
 .addr a{color:var(--ink)}
+.yr{list-style:none;margin:0;padding:0}.yr li{display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line)}.yr li.now{background:var(--accent-bg);font-weight:500}.yr .mo{width:3em}.yr .pl{width:2em;color:var(--sub)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -89,11 +90,13 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <section id="p1" role="tabpanel" aria-labelledby="t1">
   <fieldset><legend>あなた</legend>
     <div class="row">
+      <label>お名前（任意）<input type="text" id="n1" maxlength="20" autocomplete="off"></label>
       <label>生年月日<input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
       <label>性別<select id="g1"><option value="m">男性</option><option value="f">女性</option></select></label>
     </div>
   </fieldset>
-  <button class="go" id="b1">運勢を見る</button>
+  <p style="font-size:13px;color:var(--sub);margin:0 0 12px">入力した名前や生年月日は、保存も送信もされません。</p>
+  <button class="go" id="b1">鑑定する</button>
   <div class="res" id="r1" aria-live="polite"></div>
 </section>
 
@@ -191,26 +194,33 @@ function board(pl,me,bad){
   return '<div class="board">'+GRID.map(p=>{const s=pl[p],st=ST(s);
     return `<div class="cell${me===s?" me":""}${bad&&bad.includes(p)?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span></div>`}).join("")+"</div>";
 }
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function fortune(){
   const v=$("d1").value,out=$("r1");
   if(!C)return;
   if(!v){out.innerHTML='<p class="err">生年月日を入力してください。</p>';return}
+  const nm=$("n1").value.trim().slice(0,20);
   const [y,m,d]=v.split("-").map(Number),g=$("g1").value,{by,i}=info(y,m,d),s=sum(by);
   const n=wrap(g==="m"?11-s:s+4),mn=monthStar(by,i),st=ST(n),ms=ST(mn);
   const pl=place(center(BY)),pos=find(pl,n),f=C.yearly.palaceYear[pos];
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const bad=[five,anken,honSat,honTeki].filter(x=>x&&x!=="中");
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===st.el||GEN[ST(pl[p]).el]===st.el));
-  const mpl=place(monthStar(BY,TI)),mpos=find(mpl,n),mf=C.yearly.palaceMonth[mpos],mm=((TI+1)%12)+1;
+  const mpl=place(monthStar(BY,TI)),mpos=find(mpl,n),mf=C.yearly.palaceMonth[mpos];
+  const cats=C.categories.map(c=>`<div class="card"><h3>${esc(c.name)}（${BY}年）</h3><p>${esc(c.text[pos])}</p></div>`).join("");
+  const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),n);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
   $("hero").innerHTML=board(pl,n,bad)+`<p class="cap">${BY}年の年盤（点線は凶方位）</p>`;
-  out.innerHTML=`<h2>本命星：<span data-e="${st.el}">${st.name}</span></h2><p>${st.text}</p>
+  out.innerHTML=`<h2>${nm?esc(nm)+"さんの鑑定":"鑑定結果"}</h2>
+  <div class="card"><h3>本命星：<span data-e="${st.el}">${st.name}</span></h3><p>${st.text}</p></div>
   <div class="card"><h3>月命星：<span data-e="${ms.el}">${ms.name}</span></h3><p>本命星が社会での顔、月命星は内面の性質とされます。内面では次の傾向があります。${ms.text}</p></div>
   <div class="card"><h3>${BY}年の運勢：${pos}に入る「${f.t}」 <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
-  <div class="card"><h3>${mm}月（節入り以降）の運勢：${mpos}に入る「${mf.t}」</h3><p>${mf.s}</p></div>
+  ${cats}
   <div class="card"><h3>今年の吉方位</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):"今年は目立った吉方位がありません。"}</p>
   <p style="font-size:14px;color:var(--sub);margin-top:6px">あなたの星を生む、または同じ五行の星が入る方位です。</p></div>
   <div class="card"><h3>避けたい方位</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||"なし"}</p>
-  <p style="font-size:14px;color:var(--sub);margin-top:6px">五黄殺${anken?"・暗剣殺":""}${honSat?"・本命殺・本命的殺":""}にあたる方位です。</p></div>`;
+  <p style="font-size:14px;color:var(--sub);margin-top:6px">五黄殺${anken?"・暗剣殺":""}${honSat?"・本命殺・本命的殺":""}にあたる方位です。</p></div>
+  <div class="card"><h3>${BY}年の月ごとの運勢</h3><ul class="yr">${yr}</ul>
+  <p style="font-size:13px;color:var(--sub);margin-top:6px">色の付いた行が今月です。方位は、あなたの星が入る月盤の位置です。</p></div>`;
 }
 function honmei(v,g){const [y,m,d]=v.split("-").map(Number),s=sum(info(y,m,d).by);return wrap(g==="m"?11-s:s+4)}
 function compat(){
@@ -257,8 +267,16 @@ function parse(wb){
   g("節入り補正").forEach((r,i)=>{if(blank(r.slice(0,3)))return;const[y,m,d]=r.slice(0,3).map(Number);
     if(!(y>=1901&&y<=2099&&m>=1&&m<=12&&d>=1&&d<=10&&[y,m,d].every(Number.isInteger)))E("節入り補正",i,"年・月・日を正しい数字で入れてください（日は節入りの日で1〜10）");
     else(ov[y]=ov[y]||{})[m]=d});
+  const cats=[],cw=wb.Sheets["運勢カテゴリ"];
+  if(!cw)errs.push("「運勢カテゴリ」シートが見つかりません");
+  else{const rows=XLSX.utils.sheet_to_json(cw,{header:1,defval:""}).map(r=>r.map(t)),head=rows[0]||[];
+    for(let c=1;c<head.length;c++){if(!head[c])continue;const text={};
+      rows.slice(1).forEach((r,i)=>{if(blank(r))return;if(!PAL.includes(r[0])){E("運勢カテゴリ",i,"方位は 中・乾・兌・艮・離・坎・坤・震・巽 のどれかです");return}
+        if(!r[c])E("運勢カテゴリ",i,`「${head[c]}」の文章が空です`);text[r[0]]=r[c]});
+      PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
+      cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,palaceYear:py,palaceMonth:pm}};
+  return{categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx").then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));
