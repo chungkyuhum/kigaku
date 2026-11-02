@@ -271,7 +271,7 @@ function parse(wb){
   if(errs.length)throw errs;
   return{texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,palaceYear:py,palaceMonth:pm}};
 }
-fetch("content.xlsx").then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
+fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
