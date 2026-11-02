@@ -73,6 +73,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .addr a{color:var(--ink)}
 .yr{list-style:none;margin:0;padding:0}.yr li{display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line)}.yr li.now{background:var(--accent-bg);font-weight:500}.yr .mo{width:3em}.yr .pl{width:2em;color:var(--sub)}
 .priv{font-size:13px;color:var(--sub);margin:0 0 12px}
+.card.notice{border-left:4px solid var(--accent)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -139,9 +140,10 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
+let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
+  const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb;
   const a=CT[m-1],Y=y<=2000?y-1900:y-2000;
   return Math.floor(Y*.2422+(y<=2000?a[1]:a[2]))-Math.floor((m<=2?Y-1:Y)/4);
 }
@@ -173,6 +175,11 @@ function board(pl,me,bad){
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const t=(k,o)=>String(T[k]??"").replace(/\{(\w+)\}/g,(m,x)=>o&&x in o?o[x]:m);
 const tx=(k,o)=>esc(t(k,o));
+// 節入りの日に生まれた方への注意（時刻を見ていないため）
+function setsuiNote(y,m,d,who){
+  if(d!==termDay(y,m))return "";
+  return `<div class="card notice"><p>${tx(m===2?"notice_risshun":"notice_setsu",{who})}</p></div>`;
+}
 function fortune(){
   const v=$("d1").value,out=$("r1");
   if(!C)return;
@@ -189,6 +196,7 @@ function fortune(){
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
   $("hero").innerHTML=board(pl,honmeiStar,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
   out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
+  ${setsuiNote(y,m,d,t("who_input"))}
   <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p>${honmeiInfo.text}</p></div>
   <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p>${tx("getsumei_note")}${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
@@ -211,7 +219,9 @@ function compat(){
   const title=youName&&partnerName?tx("res_compat_named",{you:youName,partner:partnerName}):`<span data-e="${ex}">${ST(youStar).name}</span> ${tx("and")} <span data-e="${ey}">${ST(partnerStar).name}</span>`;
   const hYou=youName?tx("h_you_named",{name:youName,star:ST(youStar).name}):tx("h_you",{star:ST(youStar).name});
   const hPartner=partnerName?tx("h_partner_named",{name:partnerName,star:ST(partnerStar).name}):tx("h_partner",{star:ST(partnerStar).name});
+  const [ya,ma,da]=a.split("-").map(Number),[yb,mb,db]=b.split("-").map(Number);
   out.innerHTML=`<h2>${title}</h2>
+  ${setsuiNote(ya,ma,da,t("legend_you"))}${setsuiNote(yb,mb,db,t("legend_partner"))}
   <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
   ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
   <div class="card"><h3>${hYou}</h3><p>${ST(youStar).text}</p></div>
@@ -256,6 +266,10 @@ function parse(wb){
   g("節入り補正").forEach((r,i)=>{if(blank(r.slice(0,3)))return;const[y,m,d]=r.slice(0,3).map(Number);
     if(!(y>=1901&&y<=2099&&m>=1&&m<=12&&d>=1&&d<=10&&[y,m,d].every(Number.isInteger)))E("節入り補正",i,"年・月・日を正しい数字で入れてください（日は節入りの日で1〜10）");
     else(ov[y]=ov[y]||{})[m]=d});
+  const tbl={},sw=wb.Sheets["節入り日"];
+  if(sw)XLSX.utils.sheet_to_json(sw,{header:1,defval:""}).slice(1).forEach((r,i)=>{r=r.map(t);if(blank(r.slice(0,13)))return;
+    const y=+r[0];if(!(Number.isInteger(y)&&y>=1901&&y<=2099)){E("節入り日",i,"A列に西暦の年を入れてください");return}
+    const o={};for(let m=1;m<=12;m++){if(r[m]==="")continue;const d=+r[m];if(Number.isInteger(d)&&d>=1&&d<=10)o[m]=d;else E("節入り日",i,m+"月の日は1〜10の整数にしてください")}tbl[y]=o});
   const T2={},tw=wb.Sheets["画面文言"];
   if(!tw)errs.push("「画面文言」シートが見つかりません");
   else{XLSX.utils.sheet_to_json(tw,{header:1,defval:""}).slice(1).forEach(r=>{const k=t(r[0]);if(k)T2[k]=String(r[1]??"").trim()});
@@ -269,7 +283,7 @@ function parse(wb){
       PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
       cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,palaceYear:py,palaceMonth:pm}};
+  return{texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();
