@@ -103,14 +103,17 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <section id="p2" role="tabpanel" aria-labelledby="t2" hidden>
   <fieldset><legend data-t="legend_you"></legend>
     <div class="row">
+      <label><span data-t="lbl_name"></span><input type="text" id="n2" maxlength="20" autocomplete="off"></label>
       <label><span data-t="lbl_birth"></span><input type="date" id="d2" min="1901-01-01" max="2099-12-31"></label>
     </div>
   </fieldset>
   <fieldset><legend data-t="legend_partner"></legend>
     <div class="row">
+      <label><span data-t="lbl_name"></span><input type="text" id="n3" maxlength="20" autocomplete="off"></label>
       <label><span data-t="lbl_birth"></span><input type="date" id="d3" min="1901-01-01" max="2099-12-31"></label>
     </div>
   </fieldset>
+  <p class="priv" data-t="privacy"></p>
   <button class="go" id="b2" data-t="btn_compat"></button>
   <div class="res" id="r2" aria-live="polite"></div>
 </section>
@@ -136,7 +139,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "compat_note"];
+let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const a=CT[m-1],Y=y<=2000?y-1900:y-2000;
@@ -202,13 +205,17 @@ function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
   if(!C)return;
   if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
+  const youName=$("n2").value.trim().slice(0,20),partnerName=$("n3").value.trim().slice(0,20);
   const youStar=honmeiOf(a),partnerStar=honmeiOf(b),ex=ST(youStar).el,ey=ST(partnerStar).el;
   const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",r=C.fixed.relations[k];
-  out.innerHTML=`<h2><span data-e="${ex}">${ST(youStar).name}</span> ${tx("and")} <span data-e="${ey}">${ST(partnerStar).name}</span></h2>
+  const title=youName&&partnerName?tx("res_compat_named",{you:youName,partner:partnerName}):`<span data-e="${ex}">${ST(youStar).name}</span> ${tx("and")} <span data-e="${ey}">${ST(partnerStar).name}</span>`;
+  const hYou=youName?tx("h_you_named",{name:youName,star:ST(youStar).name}):tx("h_you",{star:ST(youStar).name});
+  const hPartner=partnerName?tx("h_partner_named",{name:partnerName,star:ST(partnerStar).name}):tx("h_partner",{star:ST(partnerStar).name});
+  out.innerHTML=`<h2>${title}</h2>
   <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
   ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
-  <div class="card"><h3>${tx("h_you",{star:ST(youStar).name})}</h3><p>${ST(youStar).text}</p></div>
-  <div class="card"><h3>${tx("h_partner",{star:ST(partnerStar).name})}</h3><p>${ST(partnerStar).text}</p></div>
+  <div class="card"><h3>${hYou}</h3><p>${ST(youStar).text}</p></div>
+  <div class="card"><h3>${hPartner}</h3><p>${ST(partnerStar).text}</p></div>
   <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
 }
 function applyTexts(){
