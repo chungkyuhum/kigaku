@@ -154,6 +154,15 @@ function info(y,m,d){
 }
 const center=y=>wrap(11-sum(y));
 const monthStar=(by,i)=>{const c=center(by);return wrap((c%3===1?8:c%3===2?2:5)-i)};
+// 星の計算：合計数 → 年の星 → 本命星・月命星
+function calcStars(y,m,d,gender){
+  const {by,i}=info(y,m,d);                       // by=節入りを基準にした年、i=月の番号
+  const total=sum(by);                            // 合計数
+  const yearStar=center(by);                      // 年の星（男女共通）
+  const honmei=gender==="m"?yearStar:wrap(total+4); // 本命星（男性は年の星、女性は合計数+4）
+  const getsumei=monthStar(by,i);                 // 月命星（年の星と月で決まる。男女共通）
+  return {by,i,total,yearStar,honmei,getsumei};
+}
 function place(c){const o={};ORDER.forEach((p,k)=>o[p]=wrap(c+k));return o}
 const find=(pl,s)=>Object.keys(pl).find(p=>pl[p]===s);
 const ST=n=>C.fixed.stars[n-1];
@@ -169,19 +178,19 @@ function fortune(){
   if(!C)return;
   if(!v){out.innerHTML=`<p class="err">${tx("err_birth")}</p>`;return}
   const nm=$("n1").value.trim().slice(0,20);
-  const [y,m,d]=v.split("-").map(Number),g=$("g1").value,{by,i}=info(y,m,d),s=sum(by);
-  const n=wrap(g==="m"?11-s:s+4),mn=monthStar(by,i),st=ST(n),ms=ST(mn);
-  const pl=place(center(BY)),pos=find(pl,n),f=C.yearly.palaceYear[pos];
+  const [y,m,d]=v.split("-").map(Number);
+  const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d,$("g1").value),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
+  const pl=place(center(BY)),pos=find(pl,honmeiStar),f=C.yearly.palaceYear[pos];
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const bad=[five,anken,honSat,honTeki].filter(x=>x&&x!=="中");
-  const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===st.el||GEN[ST(pl[p]).el]===st.el));
+  const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===honmeiInfo.el||GEN[ST(pl[p]).el]===honmeiInfo.el));
   const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");
   const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
-  const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),n);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
-  $("hero").innerHTML=board(pl,n,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
+  const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
+  $("hero").innerHTML=board(pl,honmeiStar,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
   out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
-  <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${st.el}">${st.name}</span></h3><p>${st.text}</p></div>
-  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${ms.el}">${ms.name}</span></h3><p>${tx("getsumei_note")}${ms.text}</p></div>
+  <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p>${honmeiInfo.text}</p></div>
+  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p>${tx("getsumei_note")}${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
@@ -191,18 +200,18 @@ function fortune(){
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>`;
 }
-function honmei(v,g){const [y,m,d]=v.split("-").map(Number),s=sum(info(y,m,d).by);return wrap(g==="m"?11-s:s+4)}
+function honmeiOf(v,g){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d,g).honmei}
 function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
   if(!C)return;
   if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
-  const x=honmei(a,$("g2").value),y=honmei(b,$("g3").value),ex=ST(x).el,ey=ST(y).el;
+  const youStar=honmeiOf(a,$("g2").value),partnerStar=honmeiOf(b,$("g3").value),ex=ST(youStar).el,ey=ST(partnerStar).el;
   const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",r=C.fixed.relations[k];
-  out.innerHTML=`<h2><span data-e="${ex}">${ST(x).name}</span> ${tx("and")} <span data-e="${ey}">${ST(y).name}</span></h2>
+  out.innerHTML=`<h2><span data-e="${ex}">${ST(youStar).name}</span> ${tx("and")} <span data-e="${ey}">${ST(partnerStar).name}</span></h2>
   <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
-  ${(x===5||y===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
-  <div class="card"><h3>${tx("h_you",{star:ST(x).name})}</h3><p>${ST(x).text}</p></div>
-  <div class="card"><h3>${tx("h_partner",{star:ST(y).name})}</h3><p>${ST(y).text}</p></div>
+  ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
+  <div class="card"><h3>${tx("h_you",{star:ST(youStar).name})}</h3><p>${ST(youStar).text}</p></div>
+  <div class="card"><h3>${tx("h_partner",{star:ST(partnerStar).name})}</h3><p>${ST(partnerStar).text}</p></div>
   <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
 }
 function applyTexts(){
