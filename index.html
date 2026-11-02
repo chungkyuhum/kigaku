@@ -93,7 +93,6 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
     <div class="row">
       <label><span data-t="lbl_name"></span><input type="text" id="n1" maxlength="20" autocomplete="off"></label>
       <label><span data-t="lbl_birth"></span><input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
-      <label><span data-t="lbl_gender"></span><select id="g1"><option value="m" data-t="opt_m"></option><option value="f" data-t="opt_f"></option></select></label>
     </div>
   </fieldset>
   <p class="priv" data-t="privacy"></p>
@@ -105,13 +104,11 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
   <fieldset><legend data-t="legend_you"></legend>
     <div class="row">
       <label><span data-t="lbl_birth"></span><input type="date" id="d2" min="1901-01-01" max="2099-12-31"></label>
-      <label><span data-t="lbl_gender"></span><select id="g2"><option value="m" data-t="opt_m"></option><option value="f" data-t="opt_f"></option></select></label>
     </div>
   </fieldset>
   <fieldset><legend data-t="legend_partner"></legend>
     <div class="row">
       <label><span data-t="lbl_birth"></span><input type="date" id="d3" min="1901-01-01" max="2099-12-31"></label>
-      <label><span data-t="lbl_gender"></span><select id="g3"><option value="f" data-t="opt_f"></option><option value="m" data-t="opt_m"></option></select></label>
     </div>
   </fieldset>
   <button class="go" id="b2" data-t="btn_compat"></button>
@@ -139,7 +136,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "lbl_gender", "opt_m", "opt_f", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "compat_note"];
+let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const a=CT[m-1],Y=y<=2000?y-1900:y-2000;
@@ -155,11 +152,11 @@ function info(y,m,d){
 const center=y=>wrap(11-sum(y));
 const monthStar=(by,i)=>{const c=center(by);return wrap((c%3===1?8:c%3===2?2:5)-i)};
 // 星の計算：合計数 → 年の星 → 本命星・月命星
-function calcStars(y,m,d,gender){
+function calcStars(y,m,d){
   const {by,i}=info(y,m,d);                       // by=節入りを基準にした年、i=月の番号
   const total=sum(by);                            // 合計数
   const yearStar=center(by);                      // 年の星（男女共通）
-  const honmei=gender==="m"?yearStar:wrap(total+4); // 本命星（男性は年の星、女性は合計数+4）
+  const honmei=yearStar;                        // 本命星（年の星と同じ。男女共通）
   const getsumei=monthStar(by,i);                 // 月命星（年の星と月で決まる。男女共通）
   return {by,i,total,yearStar,honmei,getsumei};
 }
@@ -179,7 +176,7 @@ function fortune(){
   if(!v){out.innerHTML=`<p class="err">${tx("err_birth")}</p>`;return}
   const nm=$("n1").value.trim().slice(0,20);
   const [y,m,d]=v.split("-").map(Number);
-  const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d,$("g1").value),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
+  const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
   const pl=place(center(BY)),pos=find(pl,honmeiStar),f=C.yearly.palaceYear[pos];
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const bad=[five,anken,honSat,honTeki].filter(x=>x&&x!=="中");
@@ -200,12 +197,12 @@ function fortune(){
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>`;
 }
-function honmeiOf(v,g){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d,g).honmei}
+function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d).honmei}
 function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
   if(!C)return;
   if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
-  const youStar=honmeiOf(a,$("g2").value),partnerStar=honmeiOf(b,$("g3").value),ex=ST(youStar).el,ey=ST(partnerStar).el;
+  const youStar=honmeiOf(a),partnerStar=honmeiOf(b),ex=ST(youStar).el,ey=ST(partnerStar).el;
   const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",r=C.fixed.relations[k];
   out.innerHTML=`<h2><span data-e="${ex}">${ST(youStar).name}</span> ${tx("and")} <span data-e="${ey}">${ST(partnerStar).name}</span></h2>
   <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
