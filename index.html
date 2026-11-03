@@ -143,9 +143,15 @@ const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
 let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
-  const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb;
+  const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
   const a=CT[m-1],Y=y<=2000?y-1900:y-2000;
   return Math.floor(Y*.2422+(y<=2000?a[1]:a[2]))-Math.floor((m<=2?Y-1:Y)/4);
+}
+const SETSU=["小寒","立春","啓蟄","清明","立夏","芒種","小暑","立秋","白露","寒露","立冬","大雪"];
+// 節入りの時刻（表示用）。表に時刻があり、補正で日が変わっていないときだけ返す
+function termTime(y,m){
+  const tb=((C.yearly.setsuiriTable||{})[y]||{})[m],ov=((C.yearly.setsuiriOverride||{})[y]||{})[m];
+  return tb&&tb.h!=null&&(!ov||ov===tb.d)?tb:null;
 }
 // 節入りを基準にした年（立春前は前年）と月番号（0=2月節）
 function info(y,m,d){
@@ -178,7 +184,8 @@ const tx=(k,o)=>esc(t(k,o));
 // 節入りの日に生まれた方への注意（時刻を見ていないため）
 function setsuiNote(y,m,d,who){
   if(d!==termDay(y,m))return "";
-  return `<div class="card notice"><p>${tx(m===2?"notice_risshun":"notice_setsu",{who})}</p></div>`;
+  const tm=termTime(y,m),when=`${m}月${d}日`+(tm?` ${tm.h}時${tm.mi}分`:"");
+  return `<div class="card notice"><p>${tx(m===2?"notice_risshun":"notice_setsu",{who,year:y,setsu:SETSU[m-1],when})}</p></div>`;
 }
 function fortune(){
   const v=$("d1").value,out=$("r1");
@@ -269,7 +276,10 @@ function parse(wb){
   const tbl={},sw=wb.Sheets["節入り日"];
   if(sw)XLSX.utils.sheet_to_json(sw,{header:1,defval:""}).slice(1).forEach((r,i)=>{r=r.map(t);if(blank(r.slice(0,13)))return;
     const y=+r[0];if(!(Number.isInteger(y)&&y>=1901&&y<=2099)){E("節入り日",i,"A列に西暦の年を入れてください");return}
-    const o={};for(let m=1;m<=12;m++){if(r[m]==="")continue;const d=+r[m];if(Number.isInteger(d)&&d>=1&&d<=10)o[m]=d;else E("節入り日",i,m+"月の日は1〜10の整数にしてください")}tbl[y]=o});
+    const o={};for(let m=1;m<=12;m++){if(r[m]==="")continue;
+      const s=r[m].replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace("：",":"),k=s.match(/^(\d{1,2})日?(?:\s*(\d{1,2}):(\d{2}))?$/);
+      if(k&&+k[1]>=1&&+k[1]<=10&&(k[2]==null||(+k[2]<=23&&+k[3]<=59)))o[m]={d:+k[1],h:k[2]==null?null:+k[2],mi:k[2]==null?null:+k[3]};
+      else E("節入り日",i,m+"月は「4日 5:02」のように、日と時刻（時刻は省略可）で書いてください")}tbl[y]=o});
   const T2={},tw=wb.Sheets["画面文言"];
   if(!tw)errs.push("「画面文言」シートが見つかりません");
   else{XLSX.utils.sheet_to_json(tw,{header:1,defval:""}).slice(1).forEach(r=>{const k=t(r[0]);if(k)T2[k]=String(r[1]??"").trim()});
