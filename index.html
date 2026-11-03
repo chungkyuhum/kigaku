@@ -7,15 +7,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500&display=swap">
 <style>
 :root{
-  --bg:#eef1f6;--surface:#fbfcfe;--ink:#1c2740;--sub:#5b6577;--line:#cfd6e2;--accent:#a3762a;--accent-bg:#f3e8d0;
+  --bg:#eef1f6;--surface:#fbfcfe;--ink:#1c2740;--sub:#5b6577;--line:#cfd6e2;--accent:#a3762a;--accent-bg:#f3e8d0;--good-bg:#dcefd9;--bad-bg:#f8dad5;
   --water:#2f5d8a;--wood:#3c7a4e;--fire:#b5473a;--earth:#8f6d22;--metal:#6b7685;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111826;--surface:#182134;--ink:#e6eaf3;--sub:#9aa5ba;--line:#2e3a52;--accent:#d9ae5c;--accent-bg:#3a3020;
+  --bg:#111826;--surface:#182134;--ink:#e6eaf3;--sub:#9aa5ba;--line:#2e3a52;--accent:#d9ae5c;--accent-bg:#3a3020;--good-bg:#24402e;--bad-bg:#4a2a26;
   --water:#6fa3d6;--wood:#76b88a;--fire:#e07f70;--earth:#cfa650;--metal:#a3adbb;}}
 :root[data-theme="dark"]{
-  --bg:#111826;--surface:#182134;--ink:#e6eaf3;--sub:#9aa5ba;--line:#2e3a52;--accent:#d9ae5c;--accent-bg:#3a3020;
+  --bg:#111826;--surface:#182134;--ink:#e6eaf3;--sub:#9aa5ba;--line:#2e3a52;--accent:#d9ae5c;--accent-bg:#3a3020;--good-bg:#24402e;--bad-bg:#4a2a26;
   --water:#6fa3d6;--wood:#76b88a;--fire:#e07f70;--earth:#cfa650;--metal:#a3adbb;}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
@@ -74,6 +74,13 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .yr{list-style:none;margin:0;padding:0}.yr li{display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line)}.yr li.now{background:var(--accent-bg);font-weight:500}.yr .mo{width:3em}.yr .pl{width:2em;color:var(--sub)}
 .priv{font-size:13px;color:var(--sub);margin:0 0 12px}
 .card.notice{border-left:4px solid var(--accent)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:14px 0}
+.cal .wk{text-align:center;font-size:13px;color:var(--sub)}
+.cal .day{min-height:52px;border:1px solid var(--line);border-radius:6px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}
+.cal .day .n{font-size:15px}.cal .day .s{font-size:14px;min-height:1.25em}
+.cal .day.good{background:var(--good-bg)}.cal .day.bad{background:var(--bad-bg)}.cal .day.tensha{background:var(--accent-bg);border-color:var(--accent)}
+.cal .day.today{outline:2px solid var(--ink);outline-offset:-2px;font-weight:700}
+.actnote{margin:6px 0;font-size:14px}.actnote .mk{display:inline-block;width:1.8em;text-align:center}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -87,6 +94,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <div class="tabs" role="tablist">
   <button role="tab" id="t1" aria-selected="true" aria-controls="p1" data-t="tab1"></button>
   <button role="tab" id="t2" aria-selected="false" aria-controls="p2" data-t="tab2"></button>
+  <button role="tab" id="t3" aria-selected="false" aria-controls="p3" data-t="tab3"></button>
 </div>
 
 <section id="p1" role="tabpanel" aria-labelledby="t1">
@@ -119,6 +127,14 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
   <div class="res" id="r2" aria-live="polite"></div>
 </section>
 
+<section id="p3" role="tabpanel" aria-labelledby="t3" hidden>
+  <div class="row">
+    <label><span data-t="lbl_year"></span><select id="ay"></select></label>
+    <label><span data-t="lbl_month"></span><select id="am"></select></label>
+  </div>
+  <div id="r3" aria-live="polite"></div>
+</section>
+
 <section class="contact" id="contact">
   <h2 data-t="contact_h"></h2>
   <p data-t="contact_text"></p>
@@ -140,7 +156,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
+let C,BY,TI,T={},ACT={data:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -235,6 +251,35 @@ function compat(){
   <div class="card"><h3>${hPartner}</h3><p>${ST(partnerStar).text}</p></div>
   <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
 }
+// 行動表
+function todayMsg(){
+  const n=new Date(),md=(ACT.data[n.getFullYear()]||{})[n.getMonth()+1];if(!md)return "";
+  const d=n.getDate(),k=md.tensha.includes(d)?"tensha":md.good.includes(d)?"good":md.bad.includes(d)?"bad":"none";
+  return `<div class="card notice"><p>${tx("act_today_"+k,{date:(n.getMonth()+1)+"月"+d+"日"})}</p></div>`;
+}
+function renderActions(){
+  const out=$("r3");
+  if(ACT.errors.length){out.innerHTML=ACT.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("");return}
+  const y=+$("ay").value||new Date().getFullYear(),m=+$("am").value||1,md=(ACT.data[y]||{})[m];
+  if(!md){out.innerHTML=todayMsg()+`<div class="card"><p>${tx("act_nodata",{year:y,month:m})}</p></div>`;return}
+  const dim=new Date(y,m,0).getDate(),first=new Date(y,m-1,1).getDay(),n=new Date();
+  let cells="";for(let i=0;i<first;i++)cells+="<div></div>";
+  for(let d=1;d<=dim;d++){
+    const k=md.tensha.includes(d)?"tensha":md.good.includes(d)?"good":md.bad.includes(d)?"bad":"",s=k==="tensha"?"★":k==="good"?"○":k==="bad"?"×":"";
+    const today=n.getFullYear()===y&&n.getMonth()+1===m&&n.getDate()===d;
+    cells+=`<div class="day ${k}${today?" today":""}"><span class="n">${d}</span><span class="s">${s}</span></div>`;
+  }
+  const wk="日月火水木金土".split("").map(w=>`<div class="wk">${w}</div>`).join("");
+  const note=(mk,k)=>`<p class="actnote"><span class="mk">${mk}</span><b>${tx("act_"+k+"_title")}</b>：${tx("act_"+k+"_note")}</p>`;
+  out.innerHTML=todayMsg()+`<div class="cal" role="grid">${wk}${cells}</div>${note("○","good")}${note("×","bad")}${note("★","tensha")}<p class="actnote">${tx("act_none_note")}</p>`;
+}
+function initActions(){
+  const ys=Object.keys(ACT.data).map(Number).sort((a,b)=>a-b),n=new Date(),ay=$("ay"),am=$("am");
+  ay.innerHTML=ys.map(y=>`<option value="${y}">${y}年</option>`).join("");
+  am.innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}月</option>`).join("");
+  if(ys.length){ay.value=ys.includes(n.getFullYear())?n.getFullYear():ys[ys.length-1];am.value=+ay.value===n.getFullYear()?n.getMonth()+1:1}
+  ay.onchange=am.onchange=renderActions;renderActions();
+}
 function applyTexts(){
   document.title=t("title");
   document.querySelectorAll("[data-t]").forEach(e=>{const v=t(e.dataset.t);e.textContent=v;if(v==="")e.hidden=true});
@@ -280,6 +325,21 @@ function parse(wb){
       const s=r[m].replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace("：",":"),k=s.match(/^(\d{1,2})日?(?:\s*(\d{1,2}):(\d{2}))?$/);
       if(k&&+k[1]>=1&&+k[1]<=10&&(k[2]==null||(+k[2]<=23&&+k[3]<=59)))o[m]={d:+k[1],h:k[2]==null?null:+k[2],mi:k[2]==null?null:+k[3]};
       else E("節入り日",i,m+"月は「4日 5:02」のように、日と時刻（時刻は省略可）で書いてください")}tbl[y]=o});
+  const act={},aerr=[],aw=wb.Sheets["行動表"];
+  const AE=(i,m)=>aerr.push(`「行動表」シートの${i+2}行目：${m}`);
+  if(aw)XLSX.utils.sheet_to_json(aw,{header:1,defval:""}).slice(1).forEach((r,i)=>{r=r.map(t);if(blank(r.slice(0,5)))return;
+    const y=+r[0],m=+r[1];
+    if(!(Number.isInteger(y)&&y>=1901&&y<=2099&&Number.isInteger(m)&&m>=1&&m<=12)){AE(i,"年と月に、数字を入れてください");return}
+    if((act[y]||{})[m]){AE(i,y+"年"+m+"月が、2回書かれています");return}
+    const dim=new Date(y,m,0).getDate(),bad=[];
+    const L=(s,nm)=>{if(s==="")return[];const a=s.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).split(/[,、，\s]+/).filter(Boolean).map(Number);
+      if(a.some(d=>!(Number.isInteger(d)&&d>=1&&d<=dim)))bad.push(nm+"に、"+m+"月にない日（または数字以外）があります");
+      if(new Set(a).size!==a.length)bad.push(nm+"に、同じ日が2回書かれています");return a};
+    const good=L(r[2],"良い日"),bd=L(r[3],"悪い日"),ten=L(r[4],"天赦日");
+    if(good.some(d=>bd.includes(d)))bad.push("良い日と悪い日に、同じ日が書かれています");
+    if(ten.some(d=>!good.includes(d)))bad.push("天赦日は、良い日にも書いてください");
+    if(bad.length){bad.forEach(x=>AE(i,x));return}
+    (act[y]=act[y]||{})[m]={good,bad:bd,tensha:ten}});
   const T2={},tw=wb.Sheets["画面文言"];
   if(!tw)errs.push("「画面文言」シートが見つかりません");
   else{XLSX.utils.sheet_to_json(tw,{header:1,defval:""}).slice(1).forEach(r=>{const k=t(r[0]);if(k)T2[k]=String(r[1]??"").trim()});
@@ -293,10 +353,10 @@ function parse(wb){
       PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
       cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
+  return{actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
-.then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();
+.then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;initActions();
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
   $("hero").innerHTML=board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
