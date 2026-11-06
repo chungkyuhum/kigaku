@@ -31,7 +31,9 @@ h1{font-size:clamp(28px,7vw,40px);margin:0 0 6px;letter-spacing:.06em;line-heigh
 .cell .e{font-size:12px;text-align:right;line-height:1}
 .cell.me{border:2px solid var(--accent);background:var(--accent-bg)}
 .cell.me::after{content:"あなた";position:absolute;top:5px;right:7px;font-size:11px;color:var(--accent)}
-.cell.bad{border-style:dashed}
+.cell.bad{background:var(--bad-bg);border-color:var(--fire)}
+.cell.me.bad{border-color:var(--accent)}
+.cell .x{position:absolute;left:8px;bottom:6px;font-size:12px;font-weight:700;color:var(--fire)}
 [data-e="水"]{color:var(--water)}[data-e="木"]{color:var(--wood)}[data-e="火"]{color:var(--fire)}[data-e="土"]{color:var(--earth)}[data-e="金"]{color:var(--metal)}
 .cap{text-align:center;font-size:13px;color:var(--sub);margin:0 0 26px}
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px}
@@ -195,7 +197,7 @@ const find=(pl,s)=>Object.keys(pl).find(p=>pl[p]===s);
 const ST=n=>C.fixed.stars[n-1];
 function board(pl,me,bad){
   return '<div class="board">'+GRID.map(p=>{const s=pl[p],st=ST(s);
-    return `<div class="cell${me===s?" me":""}${bad&&bad.includes(p)?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span></div>`}).join("")+"</div>";
+    return `<div class="cell${me===s?" me":""}${bad&&bad.includes(p)?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad.includes(p)?'<span class="x">凶</span>':""}</div>`}).join("")+"</div>";
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const t=(k,o)=>String(T[k]??"").replace(/\{(\w+)\}/g,(m,x)=>o&&x in o?o[x]:m);
