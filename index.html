@@ -81,6 +81,9 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .cal .day.good{background:var(--good-bg)}.cal .day.bad{background:var(--bad-bg)}.cal .day.tensha{background:var(--accent-bg);border-color:var(--accent)}
 .cal .day.today{outline:2px solid var(--ink);outline-offset:-2px;font-weight:700}
 .actnote{margin:6px 0;font-size:14px}.actnote .mk{display:inline-block;width:1.8em;text-align:center}
+.small{font-size:13px;color:var(--sub);margin:8px 0 0}.card h4{margin:16px 0 4px;font-size:15px}
+.dl{list-style:none;margin:0;padding:0}.dl li{padding:8px 0;border-bottom:1px solid var(--line)}.dl li:last-child{border-bottom:0}
+.dall{list-style:none;margin:6px 0 0;padding:0}.dall li{display:flex;gap:6px 14px;flex-wrap:wrap;padding:8px 4px;border-bottom:1px solid var(--line)}.dall .mo{width:3em;font-weight:500}.dall .g{color:var(--wood);font-weight:500}.dall .b{color:var(--fire);font-weight:500}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -156,7 +159,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_named", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -217,10 +220,12 @@ function fortune(){
   const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");
   const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
+  const bodyCard=(honmeiInfo.body||honmeiInfo.care)?`<div class="card"><h3>${tx("h_body")}</h3>${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p></div>`:"";
   $("hero").innerHTML=board(pl,honmeiStar,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
   out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
   ${setsuiNote(y,m,d,t("who_input"))}
   <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p>${honmeiInfo.text}</p></div>
+  ${bodyCard}
   <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p>${tx("getsumei_note")}${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
@@ -229,7 +234,9 @@ function fortune(){
   <div class="card"><h3>${tx("h_bad")}</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||tx("bad_none")}</p>
   <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("bad_note",{names:names.join("・")})}</p></div>
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
-  <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>`;
+  <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
+  <div class="card"><h3>${tx("h_dir")}</h3><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label><div id="dirbox"></div></div>`;
+  initDirs(honmeiStar);
 }
 function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d).honmei}
 function compat(){
@@ -250,6 +257,33 @@ function compat(){
   <div class="card"><h3>${hYou}</h3><p>${ST(youStar).text}</p></div>
   <div class="card"><h3>${hPartner}</h3><p>${ST(partnerStar).text}</p></div>
   <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
+}
+// 月ごとの方位
+const ORD_DIR=["坎","艮","震","巽","離","坤","兌","乾"];
+function monthDirs(n,k){
+  const pl=place(monthStar(BY,k)),pos=find(pl,n),five=find(pl,5),types={};
+  const add=(p,tp)=>{if(p&&p!=="中")(types[p]=types[p]||[]).push(tp)};
+  add(five,"五黄殺");add(five==="中"?null:OPP[five],"暗剣殺");add(pos,"本命殺");add(pos==="中"?null:OPP[pos],"本命的殺");
+  const el=ST(n).el;
+  return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&(ST(pl[p]).el===el||GEN[ST(pl[p]).el]===el))};
+}
+function renderDirs(n,k){
+  const box=$("dirbox");
+  if(DIRS.errors.length){box.innerHTML=DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("");return}
+  const mm=((k+1)%12)+1,{pl,types,good}=monthDirs(n,k);
+  const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${esc(DIRS.good[pl[p]-1])}</li>`).join("");
+  const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br>${esc(DIRS.bad[tp])}</li>`)).join("");
+  const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
+    return `<li><span class="mo">${((j+1)%12)+1}月</span><span><span class="g">${tx("dir_lbl_good")}</span> ${g}</span><span><span class="b">${tx("dir_lbl_bad")}</span> ${b}</span></li>`}).join("");
+  box.innerHTML=board(pl,n,Object.keys(types))+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>
+  <h4>${tx("h_dir_good",{month:mm})}</h4>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}
+  <h4>${tx("h_dir_bad",{month:mm})}</h4>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}
+  <h4>${tx("h_dir_all")}</h4><ul class="dall">${all}</ul><p class="small">${tx("dir_all_note")}</p>`;
+}
+function initDirs(n){
+  const sel=$("dm");if(!sel)return;
+  sel.innerHTML=Array.from({length:12},(_,k)=>`<option value="${k}">${((k+1)%12)+1}月</option>`).join("");
+  sel.value=TI;sel.onchange=()=>renderDirs(n,+sel.value);renderDirs(n,TI);
 }
 // 行動表
 function todayMsg(){
@@ -302,7 +336,7 @@ function parse(wb){
     if(!r[1])E("九星",k,"星の名前が空です");
     if(!"水木火土金".includes(r[2]||"x")||r[2].length!==1)E("九星",k,"五行は 水・木・火・土・金 のどれか1文字にしてください");
     if(!r[3])E("九星",k,"性格説明が空です");
-    stars.push({name:r[1],el:r[2],text:r[3]})}
+    stars.push({name:r[1],el:r[2],text:r[3],body:r[4]||"",care:r[5]||""})}
   const py={},pm={};
   g("年運").forEach((r,i)=>{if(blank(r))return;const p=r[0];if(!PAL.includes(p)){E("年運",i,"方位は 中・乾・兌・艮・離・坎・坤・震・巽 のどれかです");return}
     const n=+r[2];if(!(n>=1&&n<=5&&Number.isInteger(n)))E("年運",i,"★の数は1〜5の整数にしてください");
@@ -325,6 +359,12 @@ function parse(wb){
       const s=r[m].replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace("：",":"),k=s.match(/^(\d{1,2})日?(?:\s*(\d{1,2}):(\d{2}))?$/);
       if(k&&+k[1]>=1&&+k[1]<=10&&(k[2]==null||(+k[2]<=23&&+k[3]<=59)))o[m]={d:+k[1],h:k[2]==null?null:+k[2],mi:k[2]==null?null:+k[3]};
       else E("節入り日",i,m+"月は「4日 5:02」のように、日と時刻（時刻は省略可）で書いてください")}tbl[y]=o});
+  const dg={good:[],bad:{},errors:[]},DE=(s,i,m)=>dg.errors.push(`「${s}」シートの${i+2}行目：${m}`);
+  if(!wb.Sheets["吉方位の作用"])dg.errors.push("「吉方位の作用」シートが見つかりません");
+  else{const rows=g("吉方位の作用");for(let k=0;k<9;k++){const r=rows[k]||[];if(!r[1])DE("吉方位の作用",k,"作用の文章が空です");dg.good.push(r[1]||"")}}
+  if(!wb.Sheets["凶方位の作用"])dg.errors.push("「凶方位の作用」シートが見つかりません");
+  else{g("凶方位の作用").forEach((r,i)=>{if(r[0]){dg.bad[r[0]]=r[1];if(!r[1])DE("凶方位の作用",i,"作用の文章が空です")}});
+    ["五黄殺","暗剣殺","本命殺","本命的殺"].forEach(k=>{if(!(k in dg.bad))dg.errors.push(`「凶方位の作用」シートに「${k}」の行がありません`)})}
   const act={},aerr=[],aw=wb.Sheets["行動表"];
   const AE=(i,m)=>aerr.push(`「行動表」シートの${i+2}行目：${m}`);
   if(aw)XLSX.utils.sheet_to_json(aw,{header:1,defval:""}).slice(1).forEach((r,i)=>{r=r.map(t);if(blank(r.slice(0,5)))return;
@@ -353,10 +393,10 @@ function parse(wb){
       PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
       cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
+  return{dirs:dg,actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
-.then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;initActions();
+.then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;DIRS=C.dirs;initActions();
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
   $("hero").innerHTML=board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
