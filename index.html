@@ -83,7 +83,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .actnote{margin:6px 0;font-size:14px}.actnote .mk{display:inline-block;width:1.8em;text-align:center}
 .small{font-size:13px;color:var(--sub);margin:8px 0 0}.card h4{margin:16px 0 4px;font-size:15px}
 .dl{list-style:none;margin:0;padding:0}.dl li{padding:8px 0;border-bottom:1px solid var(--line)}.dl li:last-child{border-bottom:0}
-.dall{list-style:none;margin:6px 0 0;padding:0}.dall li{display:flex;gap:6px 14px;flex-wrap:wrap;padding:8px 4px;border-bottom:1px solid var(--line)}.dall .mo{width:3em;font-weight:500}.dall .g{color:var(--wood);font-weight:500}.dall .b{color:var(--fire);font-weight:500}
+.tw{overflow-x:auto}.dtab{width:100%;border-collapse:collapse;margin-top:6px}.dtab th,.dtab td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}.dtab thead th{border-bottom:2px solid var(--line);font-weight:500}.dtab thead .g{color:var(--wood)}.dtab thead .b{color:var(--fire)}.dtab tbody th{font-weight:500;white-space:nowrap}.dtab tr.now{background:var(--accent-bg)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -226,7 +226,7 @@ function fortune(){
   ${setsuiNote(y,m,d,t("who_input"))}
   <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p>${honmeiInfo.text}</p></div>
   ${bodyCard}
-  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p>${tx("getsumei_note")}${getsumeiInfo.text}</p></div>
+  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p>${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
@@ -274,11 +274,11 @@ function renderDirs(n,k){
   const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${esc(DIRS.good[pl[p]-1])}</li>`).join("");
   const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br>${esc(DIRS.bad[tp])}</li>`)).join("");
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
-    return `<li><span class="mo">${((j+1)%12)+1}月</span><span><span class="g">${tx("dir_lbl_good")}</span> ${g}</span><span><span class="b">${tx("dir_lbl_bad")}</span> ${b}</span></li>`}).join("");
+    return `<tr${j===k?' class="now"':""}><th scope="row">${((j+1)%12)+1}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
   box.innerHTML=board(pl,n,Object.keys(types))+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>
   <h4>${tx("h_dir_good",{month:mm})}</h4>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}
   <h4>${tx("h_dir_bad",{month:mm})}</h4>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}
-  <h4>${tx("h_dir_all")}</h4><ul class="dall">${all}</ul><p class="small">${tx("dir_all_note")}</p>`;
+  <h4>${tx("h_dir_all")}</h4><div class="tw"><table class="dtab"><thead><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col" class="g">${tx("dir_lbl_good")}</th><th scope="col" class="b">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p>`;
 }
 function initDirs(n){
   const sel=$("dm");if(!sel)return;
