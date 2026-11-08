@@ -24,6 +24,7 @@ main{max-width:720px;margin:0 auto;padding:28px 18px 56px}
 h1,h2,.serif{font-family:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;font-weight:700}
 h1{font-size:clamp(28px,7vw,40px);margin:0 0 6px;letter-spacing:.06em;line-height:1.3}
 .lead{color:var(--sub);margin:0 0 22px}
+.dragon{margin:6px 0 18px}.dragon img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:420px;margin:0 auto 8px}
 .cell{aspect-ratio:1;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
 .cell .p{font-size:12px;color:var(--sub);line-height:1.3}
@@ -91,6 +92,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <body>
 <main>
 <h1 data-t="h1"></h1>
+<div class="dragon"><img src="dragon.jpg" alt="" width="1200" height="675" decoding="async" onerror="this.parentNode.hidden=true"></div>
 <p class="lead" data-t="lead"></p>
 
 <div id="hero"></div>
