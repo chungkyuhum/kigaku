@@ -155,6 +155,10 @@ const GRID=["巽","離","坤","震","中","兌","艮","坎","乾"];
 const ORDER=["中","乾","兌","艮","離","坎","坤","震","巽"];
 const DIR={巽:"南東",離:"南",坤:"南西",震:"東",中:"中央",兌:"西",艮:"北東",坎:"北",乾:"北西"};
 const OPP={坎:"離",離:"坎",坤:"艮",艮:"坤",震:"兌",兌:"震",巽:"乾",乾:"巽"};
+// 十二支（子丑寅卯辰巳午未申酉戌亥）が入る方位。歳破・月破は、その十二支の反対側（六冲）の方位
+const BRDIR=["坎","艮","艮","震","巽","巽","離","坤","坤","兌","乾","乾"];
+const yearBreak=by=>BRDIR[((((by-4)%12)+12)%12+6)%12];   // 歳破：年の十二支の反対側（子＝4年）
+const monthBreak=i=>BRDIR[(i+8)%12];                      // 月破：月の十二支の反対側（i=0 が寅月）
 const GEN={水:"木",木:"火",火:"土",土:"金",金:"水"};
 const CTL={木:"土",土:"水",水:"火",火:"金",金:"木"};
 // 節入りの近似式の係数 [月, 20世紀, 21世紀]（小寒〜大雪）
@@ -218,9 +222,9 @@ function fortune(){
   const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
   const pl=place(center(BY)),pos=find(pl,honmeiStar),f=C.yearly.palaceYear[pos];
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
-  const bad=[five,anken,honSat,honTeki].filter(x=>x&&x!=="中");
+  const saiha=yearBreak(BY),bad=[five,anken,honSat,honTeki,saiha].filter(x=>x&&x!=="中");
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===honmeiInfo.el||GEN[ST(pl[p]).el]===honmeiInfo.el));
-  const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");
+  const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");names.push("歳破");
   const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
   const bodyCard=(honmeiInfo.body||honmeiInfo.care)?`<div class="card"><h3>${tx("h_body")}</h3>${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p></div>`:"";
@@ -266,7 +270,7 @@ const ORD_DIR=["坎","艮","震","巽","離","坤","兌","乾"];
 function monthDirs(n,k){
   const pl=place(monthStar(BY,k)),pos=find(pl,n),five=find(pl,5),types={};
   const add=(p,tp)=>{if(p&&p!=="中")(types[p]=types[p]||[]).push(tp)};
-  add(five,"五黄殺");add(five==="中"?null:OPP[five],"暗剣殺");add(pos,"本命殺");add(pos==="中"?null:OPP[pos],"本命的殺");
+  add(five,"五黄殺");add(five==="中"?null:OPP[five],"暗剣殺");add(pos,"本命殺");add(pos==="中"?null:OPP[pos],"本命的殺");add(yearBreak(BY),"歳破");add(monthBreak(k),"月破");
   const el=ST(n).el;
   return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&(ST(pl[p]).el===el||GEN[ST(pl[p]).el]===el))};
 }
@@ -367,7 +371,7 @@ function parse(wb){
   else{const rows=g("吉方位の作用");for(let k=0;k<9;k++){const r=rows[k]||[];if(!r[1])DE("吉方位の作用",k,"作用の文章が空です");dg.good.push(r[1]||"")}}
   if(!wb.Sheets["凶方位の作用"])dg.errors.push("「凶方位の作用」シートが見つかりません");
   else{g("凶方位の作用").forEach((r,i)=>{if(r[0]){dg.bad[r[0]]=r[1];if(!r[1])DE("凶方位の作用",i,"作用の文章が空です")}});
-    ["五黄殺","暗剣殺","本命殺","本命的殺"].forEach(k=>{if(!(k in dg.bad))dg.errors.push(`「凶方位の作用」シートに「${k}」の行がありません`)})}
+    ["五黄殺","暗剣殺","本命殺","本命的殺","歳破","月破"].forEach(k=>{if(!(k in dg.bad))dg.errors.push(`「凶方位の作用」シートに「${k}」の行がありません`)})}
   const act={},aerr=[],aw=wb.Sheets["行動表"];
   const AE=(i,m)=>aerr.push(`「行動表」シートの${i+2}行目：${m}`);
   if(aw)XLSX.utils.sheet_to_json(aw,{header:1,defval:""}).slice(1).forEach((r,i)=>{r=r.map(t);if(blank(r.slice(0,5)))return;
