@@ -50,7 +50,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .res h2{font-size:24px;margin:0 0 4px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
 .card h3{margin:0 0 4px;font-size:16px}
-.card p{margin:0}.card p.pl{white-space:pre-line}
+.card p{margin:0}.pl{white-space:pre-line}
 .stars{color:var(--accent);letter-spacing:.1em}
 .score{font-family:"Zen Old Mincho",serif;font-size:44px;font-weight:700;line-height:1}
 .err{color:var(--fire)}
@@ -204,7 +204,7 @@ function board(pl,me,bad){
   return '<div class="board">'+GRID.map(p=>{const s=pl[p],st=ST(s);
     return `<div class="cell${me===s?" me":""}${bad&&bad.includes(p)?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad.includes(p)?'<span class="x">凶</span>':""}</div>`}).join("")+"</div>";
 }
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc=s=>String(s).replace(/\r\n?/g,"\n").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const t=(k,o)=>String(T[k]??"").replace(/\{(\w+)\}/g,(m,x)=>o&&x in o?o[x]:m);
 const tx=(k,o)=>esc(t(k,o));
 // 節入りの日に生まれた方への注意（時刻を見ていないため）
@@ -274,12 +274,17 @@ function monthDirs(n,k){
   const el=ST(n).el;
   return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&(ST(pl[p]).el===el||GEN[ST(pl[p]).el]===el))};
 }
+// 吉方位の作用：方徳 → 方災 の順に続けて表示（セル内の改行はそのまま反映）
+function goodText(g){
+  const parts=[["lbl_hotoku","【方徳】",g.toku],["lbl_hosai","【方災】",g.sai]].filter(x=>x[2]).map(x=>(T[x[0]]||x[1])+"\n"+esc(x[2]));
+  return `<span class="pl">${parts.join("\n\n")}</span>`;
+}
 function renderDirs(n,k){
   const box=$("dirbox");
   if(DIRS.errors.length){box.innerHTML=DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("");return}
   const mm=((k+1)%12)+1,{pl,types,good}=monthDirs(n,k);
-  const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${esc(DIRS.good[pl[p]-1])}</li>`).join("");
-  const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br>${esc(DIRS.bad[tp])}</li>`)).join("");
+  const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join("");
+  const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
     return `<tr${j===k?' class="now"':""}><th scope="row">${((j+1)%12)+1}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
   box.innerHTML=board(pl,n,Object.keys(types))+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>
@@ -343,7 +348,7 @@ function parse(wb){
     if(!r[1])E("九星",k,"星の名前が空です");
     if(!"水木火土金".includes(r[2]||"x")||r[2].length!==1)E("九星",k,"五行は 水・木・火・土・金 のどれか1文字にしてください");
     if(!r[3])E("九星",k,"性格説明が空です");
-    stars.push({name:r[1],el:r[2],text:r[3],body:r[4]||"",care:r[5]||""})}
+    stars.push({name:r[1],el:r[2],text:String(r[3]).replace(/\r\n?/g,"\n"),body:r[4]||"",care:r[5]||""})}
   const py={},pm={};
   g("年運").forEach((r,i)=>{if(blank(r))return;const p=r[0];if(!PAL.includes(p)){E("年運",i,"方位は 中・乾・兌・艮・離・坎・坤・震・巽 のどれかです");return}
     const n=+r[2];if(!(n>=1&&n<=5&&Number.isInteger(n)))E("年運",i,"★の数は1〜5の整数にしてください");
@@ -368,7 +373,7 @@ function parse(wb){
       else E("節入り日",i,m+"月は「4日 5:02」のように、日と時刻（時刻は省略可）で書いてください")}tbl[y]=o});
   const dg={good:[],bad:{},errors:[]},DE=(s,i,m)=>dg.errors.push(`「${s}」シートの${i+2}行目：${m}`);
   if(!wb.Sheets["吉方位の作用"])dg.errors.push("「吉方位の作用」シートが見つかりません");
-  else{const rows=g("吉方位の作用");for(let k=0;k<9;k++){const r=rows[k]||[];if(!r[1])DE("吉方位の作用",k,"作用の文章が空です");dg.good.push(r[1]||"")}}
+  else{const rows=g("吉方位の作用");for(let k=0;k<9;k++){const r=rows[k]||[];if(!r[1])DE("吉方位の作用",k,"方徳の作用の文章が空です");dg.good.push({toku:r[1]||"",sai:r[2]||""})}}
   if(!wb.Sheets["凶方位の作用"])dg.errors.push("「凶方位の作用」シートが見つかりません");
   else{g("凶方位の作用").forEach((r,i)=>{if(r[0]){dg.bad[r[0]]=r[1];if(!r[1])DE("凶方位の作用",i,"作用の文章が空です")}});
     ["五黄殺","暗剣殺","本命殺","本命的殺","歳破","月破"].forEach(k=>{if(!(k in dg.bad))dg.errors.push(`「凶方位の作用」シートに「${k}」の行がありません`)})}
