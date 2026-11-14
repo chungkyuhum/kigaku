@@ -50,7 +50,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .res h2{font-size:24px;margin:0 0 4px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
 .card h3{margin:0 0 4px;font-size:16px}
-.card p{margin:0}
+.card p{margin:0}.card p.pl{white-space:pre-line}
 .stars{color:var(--accent);letter-spacing:.1em}
 .score{font-family:"Zen Old Mincho",serif;font-size:44px;font-weight:700;line-height:1}
 .err{color:var(--fire)}
@@ -231,9 +231,9 @@ function fortune(){
   $("hero").innerHTML=board(pl,honmeiStar,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
   out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
   ${setsuiNote(y,m,d,t("who_input"))}
-  <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p>${honmeiInfo.text}</p></div>
+  <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p class="pl">${honmeiInfo.text}</p></div>
   ${bodyCard}
-  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p>${getsumeiInfo.text}</p></div>
+  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p class="pl">${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
@@ -261,8 +261,8 @@ function compat(){
   ${setsuiNote(ya,ma,da,t("legend_you"))}${setsuiNote(yb,mb,db,t("legend_partner"))}
   <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
   ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
-  <div class="card"><h3>${hYou}</h3><p>${ST(youStar).text}</p></div>
-  <div class="card"><h3>${hPartner}</h3><p>${ST(partnerStar).text}</p></div>
+  <div class="card"><h3>${hYou}</h3><p class="pl">${ST(youStar).text}</p></div>
+  <div class="card"><h3>${hPartner}</h3><p class="pl">${ST(partnerStar).text}</p></div>
   <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
 }
 // 月ごとの方位
