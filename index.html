@@ -286,14 +286,13 @@ function monthDirs(n,k){
 const MAPDIR=[["坎",0],["艮",45],["震",90],["巽",135],["離",180],["坤",225],["兌",270],["乾",315]];
 let mapSvg=null,mapCap=null;
 function mapSvgHtml(good,bad){
-  const R=34,LR=41,pt=(r,a)=>[50+r*Math.sin(a*Math.PI/180),50-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(2));
+  const R=50,pt=(r,a)=>[50+r*Math.sin(a*Math.PI/180),50-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(2));
   let o="";
   MAPDIR.forEach(([p,c])=>{
     const half=c%90===0?15:30,[x0,y0]=pt(R,c-half),[x1,y1]=pt(R,c+half);
     const fill=bad.includes(p)?"rgba(214,62,50,.36)":good.includes(p)?"rgba(52,160,84,.36)":"rgba(190,215,255,.28)";
     o+=`<path d="M50,50 L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" fill="${fill}" stroke="#fff" stroke-width=".45" stroke-linejoin="round"/>`;
-    if(c%90===0){const [x,y]=pt(R,c);o+=`<line x1="50" y1="50" x2="${x}" y2="${y}" stroke="#fff" stroke-width=".25" opacity=".9"/>`}
-    const [lx,ly]=pt(LR,c);
+    const [lx,ly]=pt(c%90===0?41:39,c);
     o+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="3.3" font-weight="700" fill="#fff" stroke="#14478f" stroke-width=".9" paint-order="stroke" stroke-linejoin="round">${DIR[p]}${c%90===0?"30":"60"}°</text>`;
   });
   return o+`<circle cx="50" cy="50" r="1.3" fill="#e5001a" stroke="#fff" stroke-width=".5"/>`;
