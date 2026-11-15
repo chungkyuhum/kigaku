@@ -290,7 +290,7 @@ function mapSvgHtml(good,bad){
   let o="";
   MAPDIR.forEach(([p,c])=>{
     const half=c%90===0?15:30,[x0,y0]=pt(R,c-half),[x1,y1]=pt(R,c+half);
-    const fill=bad.includes(p)?"rgba(214,62,50,.36)":good.includes(p)?"rgba(52,160,84,.36)":c%90===0?"rgba(190,215,255,.28)":"rgba(255,226,150,.30)";
+    const fill=bad.includes(p)?"rgba(214,62,50,.36)":good.includes(p)?"rgba(52,160,84,.36)":"rgba(190,215,255,.28)";
     o+=`<path d="M50,50 L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" fill="${fill}" stroke="#fff" stroke-width=".45" stroke-linejoin="round"/>`;
     if(c%90===0){const [x,y]=pt(R,c);o+=`<line x1="50" y1="50" x2="${x}" y2="${y}" stroke="#fff" stroke-width=".25" opacity=".9"/>`}
     const [lx,ly]=pt(LR,c);
