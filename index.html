@@ -290,12 +290,12 @@ function relationFig(youStar,partnerStar,youName,partnerName){
   const node=e=>{
     const [x,y]=P[e],people=[];if(e===ex)people.push([nameY,ey]);if(e===eq)people.push([nameP,ep]);
     const on=people.length>0,two=people.length===2&&ey.name!==ep.name;let o=`<circle class="nd${on?" on":""}" cx="${f(x)}" cy="${f(y)}" r="${NR}"/>`;
-    o+=`<text class="el" data-e="${e}" x="${f(x)}" y="${f(y-(two?12:on?2:0))}">${e}</text>`;
+    o+=`<text class="el" data-e="${e}" x="${f(x)}" y="${f(y-(two?6:on?2:0))}">${e}</text>`;
     if(people.length===1){
-      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+14)}" text-anchor="middle">${esc(people[0][0])}</text><text class="st" x="${f(x)}" y="${f(y+NR-12)}">${people[0][1].name}</text>`;
+      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+19)}" text-anchor="middle">${esc(people[0][0])}</text><text class="st" x="${f(x)}" y="${f(y+NR-12)}">${people[0][1].name}</text>`;
     }else if(people.length===2){
-      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR-7)}" text-anchor="middle">${esc(nameY)}・${esc(nameP)}</text>`;
-      o+=ey.name===ep.name?`<text class="st" x="${f(x)}" y="${f(y+NR-12)}">${ey.name}</text>`:`<text class="st" x="${f(x)}" y="${f(y+NR-27)}">${ey.name}</text><text class="st" x="${f(x)}" y="${f(y+NR-14)}">${ep.name}</text>`;
+      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+(two?17:19))}" text-anchor="middle">${esc(nameY)} ${esc(nameP)}</text>`;
+      o+=ey.name===ep.name?`<text class="st" x="${f(x)}" y="${f(y+NR-12)}">${ey.name}</text>`:`<text class="st" x="${f(x)}" y="${f(y+NR-22)}">${ey.name}</text><text class="st" x="${f(x)}" y="${f(y+NR-10)}">${ep.name}</text>`;
     }
     return o;
   };
