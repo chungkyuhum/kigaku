@@ -58,10 +58,10 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .mapwrap .cap{margin:10px 0 0}
 .rg{display:block;width:100%;max-width:420px;height:auto;margin:6px auto 0}
 .rg .nd{fill:var(--surface);stroke:var(--line);stroke-width:1.5}.rg .nd.on{fill:var(--accent-bg);stroke:var(--accent);stroke-width:3}
-.rg .el{fill:currentColor;font-family:"Zen Old Mincho",serif;font-weight:700;font-size:30px;text-anchor:middle;dominant-baseline:central}
+.rg .el{fill:currentColor;font-family:"Zen Old Mincho",serif;font-weight:700;font-size:26px;text-anchor:middle;dominant-baseline:central}
 .rg .st{fill:var(--ink);font-size:10.5px;text-anchor:middle}.rg .tag{fill:var(--accent);font-size:10.5px}
 .rg .ar{fill:none;stroke-width:2.2;stroke-linecap:round}.rg .ar.g{stroke:var(--wood)}.rg .ar.c{stroke:var(--fire)}
-.rg .ar.dim{opacity:.2}.rg .ar.on{stroke-width:3.6}.rg .mg{fill:var(--wood)}.rg .mc{fill:var(--fire)}
+.rg .ar.dim{opacity:.4}.rg .ar.on{stroke-width:3.6}.rg .mg{fill:var(--wood)}.rg .mc{fill:var(--fire)}
 .rg .lb{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round}
 .rg .lb.g{fill:var(--wood)}.rg .lb.c{fill:var(--fire)}
 .rgcap{text-align:center;font-weight:500;margin:4px 0 14px}
@@ -262,19 +262,30 @@ function fortune(){
   initDirs(honmeiStar);
 }
 function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d).honmei}
-// 五行の関係図：二人の星を強調し、二人をつなぐ矢印（生む＝緑／剋す＝赤）だけを濃く描く。年盤と同じ配色
+// 五行の関係図：二人の星を強調し、二人をつなぐ矢印（生む＝緑の曲線／剋す＝赤の直線）だけを濃く描く。年盤と同じ配色
+// 五行は正五角形の頂点に円で配置。矢印はすべて、相手の円の「中心」に向かって入る。
 function relationFig(youStar,partnerStar,youName,partnerName){
-  const EL5=["木","火","土","金","水"],P={},CX=200,CY=175,R=130,HW=42,HH=33;
+  const EL5=["木","火","土","金","水"],P={},CX=200,CY=186,R=128,NR=35;
   EL5.forEach((e,i)=>{const a=i*72*Math.PI/180;P[e]=[CX+R*Math.sin(a),CY-R*Math.cos(a)]});
-  const ey=ST(youStar),ep=ST(partnerStar),ex=ey.el,eq=ep.el;
-  const nameY=youName?youName.slice(0,6)+(youName.length>6?"…":""):t("legend_you"),nameP=partnerName?partnerName.slice(0,6)+(partnerName.length>6?"…":""):t("legend_partner");
+  const ey=ST(youStar),ep=ST(partnerStar),ex=ey.el,eq=ep.el,f=v=>v.toFixed(1);
+  const cut=(n,m)=>{n=String(n);return n.length>m?n.slice(0,m)+"…":n};
+  const nameY=youName?cut(youName,4):t("legend_you"),nameP=partnerName?cut(partnerName,4):t("legend_partner");
   const capY=youName?youName+"さん":t("legend_you"),capP=partnerName?partnerName+"さん":t("legend_partner");
   const arrow=(a,b,kind,on)=>{
-    const [x1,y1]=P[a],[x2,y2]=P[b],L=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/L,uy=(y2-y1)/L,tt=Math.min(HW/(Math.abs(ux)||1e-9),HH/(Math.abs(uy)||1e-9));
-    const sx=x1+ux*(tt+5),sy=y1+uy*(tt+5),ex2=x2-ux*(tt+9),ey2=y2-uy*(tt+9),mx=(sx+ex2)/2,my=(sy+ey2)/2;
-    const cx=kind==="g"?mx+(mx-CX)*.2:mx,cy=kind==="g"?my+(my-CY)*.2:my;
-    return {svg:`<path class="ar ${kind}${on?" on":" dim"}" d="M${sx.toFixed(1)},${sy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${ex2.toFixed(1)},${ey2.toFixed(1)}" marker-end="url(#rg${kind})"/>`,
-      lx:(0.25*sx+0.5*cx+0.25*ex2).toFixed(1),ly:(0.25*sy+0.5*cy+0.25*ey2).toFixed(1)};
+    const [ax,ay]=P[a],[bx,by]=P[b],L=Math.hypot(bx-ax,by-ay),ux=(bx-ax)/L,uy=(by-ay)/L;
+    let d,lx,ly;
+    if(kind==="c"){ // 陰（剋す）：中心から中心への直線。円の縁から縁まで
+      const sx=ax+ux*(NR+4),sy=ay+uy*(NR+4),tx=bx-ux*(NR+6),ty=by-uy*(NR+6);
+      d=`M${f(sx)},${f(sy)} L${f(tx)},${f(ty)}`;lx=(sx+tx)/2;ly=(sy+ty)/2;
+    }else{ // 陽（生む）：外側にふくらむ曲線。出口は自分の円の中心から外向き、入口は相手の円の中心に向かう
+      const mx=(ax+bx)/2-CX,my=(ay+by)/2-CY,ml=Math.hypot(mx,my),nx=mx/ml,ny=my/ml,th=40*Math.PI/180,c=Math.cos(th),sn=Math.sin(th);
+      const ds=[ux*c+nx*sn,uy*c+ny*sn],de=[-ux*c+nx*sn,-uy*c+ny*sn],k=L*.32;
+      const S=[ax+ds[0]*(NR+4),ay+ds[1]*(NR+4)],E=[bx+de[0]*(NR+7),by+de[1]*(NR+7)];
+      const C1=[S[0]+ds[0]*k,S[1]+ds[1]*k],C2=[E[0]+de[0]*k,E[1]+de[1]*k];
+      d=`M${f(S[0])},${f(S[1])} C${f(C1[0])},${f(C1[1])} ${f(C2[0])},${f(C2[1])} ${f(E[0])},${f(E[1])}`;
+      lx=(S[0]+3*C1[0]+3*C2[0]+E[0])/8;ly=(S[1]+3*C1[1]+3*C2[1]+E[1])/8;
+    }
+    return {svg:`<path class="ar ${kind}${on?" on":" dim"}" d="${d}" marker-end="url(#rg${kind==="g"?"g":"c"})"/>`,lx:f(lx),ly:f(ly)};
   };
   let rel=null;
   if(ex!==eq){
@@ -282,22 +293,23 @@ function relationFig(youStar,partnerStar,youName,partnerName){
     else if(CTL[ex]===eq)rel={a:ex,b:eq,k:"c",from:capY,to:capP};else rel={a:eq,b:ex,k:"c",from:capP,to:capY};
   }
   let dim="",hi="",lab="";
-  EL5.forEach((e,i)=>{const n=EL5[(i+1)%5];dim+=arrow(e,n,"g",false).svg});
-  EL5.forEach((e,i)=>{const n=EL5[(i+2)%5];dim+=arrow(e,n,"c",false).svg});
+  EL5.forEach((e,i)=>{dim+=arrow(e,EL5[(i+1)%5],"g",false).svg});
+  EL5.forEach((e,i)=>{dim+=arrow(e,EL5[(i+2)%5],"c",false).svg});
   if(rel){const A=arrow(rel.a,rel.b,rel.k,true);hi=A.svg;lab=`<text class="lb ${rel.k}" x="${A.lx}" y="${A.ly}">${rel.k==="g"?"生む":"剋す"}</text>`}
   const node=e=>{
     const [x,y]=P[e],people=[];if(e===ex)people.push([nameY,ey]);if(e===eq)people.push([nameP,ep]);
-    const on=people.length>0;let o=`<rect class="nd${on?" on":""}" x="${(x-HW).toFixed(1)}" y="${(y-HH).toFixed(1)}" width="${HW*2}" height="${HH*2}" rx="9"/>`;
-    o+=`<text class="el" data-e="${e}" x="${x.toFixed(1)}" y="${(y-(on?7:0)).toFixed(1)}">${e}</text>`;
-    if(people.length===1){o+=`<text class="tag" x="${(x+HW-6).toFixed(1)}" y="${(y-HH+13).toFixed(1)}" text-anchor="end">${esc(people[0][0])}</text><text class="st" x="${x.toFixed(1)}" y="${(y+HH-9).toFixed(1)}">${people[0][1].name}</text>`}
-    else if(people.length===2){
-      o+=`<text class="tag" x="${(x-HW+6).toFixed(1)}" y="${(y-HH+13).toFixed(1)}" text-anchor="start">${esc(nameY)}</text><text class="tag" x="${(x+HW-6).toFixed(1)}" y="${(y-HH+13).toFixed(1)}" text-anchor="end">${esc(nameP)}</text>`;
-      o+=ey.name===ep.name?`<text class="st" x="${x.toFixed(1)}" y="${(y+HH-9).toFixed(1)}">${ey.name}</text>`:`<text class="st" x="${x.toFixed(1)}" y="${(y+HH-20).toFixed(1)}">${ey.name}</text><text class="st" x="${x.toFixed(1)}" y="${(y+HH-8).toFixed(1)}">${ep.name}</text>`;
+    const on=people.length>0,two=people.length===2&&ey.name!==ep.name;let o=`<circle class="nd${on?" on":""}" cx="${f(x)}" cy="${f(y)}" r="${NR}"/>`;
+    o+=`<text class="el" data-e="${e}" x="${f(x)}" y="${f(y-(two?12:on?2:0))}">${e}</text>`;
+    if(people.length===1){
+      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+13)}" text-anchor="middle">${esc(people[0][0])}</text><text class="st" x="${f(x)}" y="${f(y+NR-11)}">${people[0][1].name}</text>`;
+    }else if(people.length===2){
+      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR-7)}" text-anchor="middle">${esc(nameY)}・${esc(nameP)}</text>`;
+      o+=ey.name===ep.name?`<text class="st" x="${f(x)}" y="${f(y+NR-11)}">${ey.name}</text>`:`<text class="st" x="${f(x)}" y="${f(y+NR-25)}">${ey.name}</text><text class="st" x="${f(x)}" y="${f(y+NR-13)}">${ep.name}</text>`;
     }
     return o;
   };
   const cap=!rel?`${capY}・${capP}：同じ五行（比和）`:`${rel.from}が${rel.to}を${rel.k==="g"?"生む":"剋す"}`;
-  return `<svg class="rg" viewBox="0 0 400 330" role="img" aria-label="${esc(cap)}"><defs><marker id="rgg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker><marker id="rgc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mc" d="M0,0 L10,5 L0,10 z"/></marker></defs>${dim}${EL5.map(node).join("")}${hi}${lab}</svg><p class="rgcap">${esc(cap)}</p>`;
+  return `<svg class="rg" viewBox="0 0 400 340" role="img" aria-label="${esc(cap)}"><defs><marker id="rgg" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mg" d="M0,2.5 L10,5 L0,7.5 z"/></marker><marker id="rgc" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mc" d="M0,2.5 L10,5 L0,7.5 z"/></marker></defs>${dim}${EL5.map(node).join("")}${hi}${lab}</svg><p class="rgcap">${esc(cap)}</p>`;
 }
 function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
