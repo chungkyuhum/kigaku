@@ -262,10 +262,10 @@ function fortune(){
   initDirs(honmeiStar);
 }
 function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d).honmei}
-// 五行の関係図：二人の星を強調し、二人をつなぐ矢印（生む＝緑の曲線／剋す＝赤の直線）だけを濃く描く。年盤と同じ配色
-// 五行は正五角形の頂点に円で配置。矢印はすべて、相手の円の「中心」に向かって入る。
+// 五行の関係図：二人の星を強調し、二人をつなぐ矢印（生む＝緑／剋す＝赤）だけを濃く描く。年盤と同じ配色
+// 五行は正五角形の頂点に円で配置。矢印は（生む・剋すとも）直線で、相手の円の「中心」に向かって入る。
 function relationFig(youStar,partnerStar,youName,partnerName){
-  const EL5=["木","火","土","金","水"],P={},CX=200,CY=186,R=128,NR=35;
+  const EL5=["木","火","土","金","水"],P={},CX=200,CY=186,R=128,NR=39;
   EL5.forEach((e,i)=>{const a=i*72*Math.PI/180;P[e]=[CX+R*Math.sin(a),CY-R*Math.cos(a)]});
   const ey=ST(youStar),ep=ST(partnerStar),ex=ey.el,eq=ep.el,f=v=>v.toFixed(1);
   const cut=(n,m)=>{n=String(n);return n.length>m?n.slice(0,m)+"…":n};
@@ -273,18 +273,9 @@ function relationFig(youStar,partnerStar,youName,partnerName){
   const capY=youName?youName+"さん":t("legend_you"),capP=partnerName?partnerName+"さん":t("legend_partner");
   const arrow=(a,b,kind,on)=>{
     const [ax,ay]=P[a],[bx,by]=P[b],L=Math.hypot(bx-ax,by-ay),ux=(bx-ax)/L,uy=(by-ay)/L;
-    let d,lx,ly;
-    if(kind==="c"){ // 陰（剋す）：中心から中心への直線。円の縁から縁まで
-      const sx=ax+ux*(NR+4),sy=ay+uy*(NR+4),tx=bx-ux*(NR+6),ty=by-uy*(NR+6);
-      d=`M${f(sx)},${f(sy)} L${f(tx)},${f(ty)}`;lx=(sx+tx)/2;ly=(sy+ty)/2;
-    }else{ // 陽（生む）：外側にふくらむ曲線。出口は自分の円の中心から外向き、入口は相手の円の中心に向かう
-      const mx=(ax+bx)/2-CX,my=(ay+by)/2-CY,ml=Math.hypot(mx,my),nx=mx/ml,ny=my/ml,th=40*Math.PI/180,c=Math.cos(th),sn=Math.sin(th);
-      const ds=[ux*c+nx*sn,uy*c+ny*sn],de=[-ux*c+nx*sn,-uy*c+ny*sn],k=L*.32;
-      const S=[ax+ds[0]*(NR+4),ay+ds[1]*(NR+4)],E=[bx+de[0]*(NR+7),by+de[1]*(NR+7)];
-      const C1=[S[0]+ds[0]*k,S[1]+ds[1]*k],C2=[E[0]+de[0]*k,E[1]+de[1]*k];
-      d=`M${f(S[0])},${f(S[1])} C${f(C1[0])},${f(C1[1])} ${f(C2[0])},${f(C2[1])} ${f(E[0])},${f(E[1])}`;
-      lx=(S[0]+3*C1[0]+3*C2[0]+E[0])/8;ly=(S[1]+3*C1[1]+3*C2[1]+E[1])/8;
-    }
+    // 生む・剋す どちらも、中心から中心への直線。円の縁から縁までを描き、矢印の先は相手の円の中心に向かう
+    const sx=ax+ux*(NR+4),sy=ay+uy*(NR+4),tx=bx-ux*(NR+6),ty=by-uy*(NR+6);
+    const d=`M${f(sx)},${f(sy)} L${f(tx)},${f(ty)}`,lx=(sx+tx)/2,ly=(sy+ty)/2;
     return {svg:`<path class="ar ${kind}${on?" on":" dim"}" d="${d}" marker-end="url(#rg${kind==="g"?"g":"c"})"/>`,lx:f(lx),ly:f(ly)};
   };
   let rel=null;
@@ -301,10 +292,10 @@ function relationFig(youStar,partnerStar,youName,partnerName){
     const on=people.length>0,two=people.length===2&&ey.name!==ep.name;let o=`<circle class="nd${on?" on":""}" cx="${f(x)}" cy="${f(y)}" r="${NR}"/>`;
     o+=`<text class="el" data-e="${e}" x="${f(x)}" y="${f(y-(two?12:on?2:0))}">${e}</text>`;
     if(people.length===1){
-      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+13)}" text-anchor="middle">${esc(people[0][0])}</text><text class="st" x="${f(x)}" y="${f(y+NR-11)}">${people[0][1].name}</text>`;
+      o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+14)}" text-anchor="middle">${esc(people[0][0])}</text><text class="st" x="${f(x)}" y="${f(y+NR-12)}">${people[0][1].name}</text>`;
     }else if(people.length===2){
       o+=`<text class="tag" x="${f(x)}" y="${f(y-NR-7)}" text-anchor="middle">${esc(nameY)}・${esc(nameP)}</text>`;
-      o+=ey.name===ep.name?`<text class="st" x="${f(x)}" y="${f(y+NR-11)}">${ey.name}</text>`:`<text class="st" x="${f(x)}" y="${f(y+NR-25)}">${ey.name}</text><text class="st" x="${f(x)}" y="${f(y+NR-13)}">${ep.name}</text>`;
+      o+=ey.name===ep.name?`<text class="st" x="${f(x)}" y="${f(y+NR-12)}">${ey.name}</text>`:`<text class="st" x="${f(x)}" y="${f(y+NR-27)}">${ey.name}</text><text class="st" x="${f(x)}" y="${f(y+NR-14)}">${ep.name}</text>`;
     }
     return o;
   };
