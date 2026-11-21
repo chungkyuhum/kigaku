@@ -33,7 +33,7 @@ h1{font-size:clamp(28px,7vw,40px);margin:0 0 6px;letter-spacing:.06em;line-heigh
 .cell.me{border:2px solid var(--accent);background:var(--accent-bg)}
 .cell.me::after{content:"あなた";position:absolute;top:5px;right:7px;font-size:11px;color:var(--accent)}
 .cell.bad{background:var(--bad-bg)}
-.cell .x{position:absolute;left:8px;bottom:6px;font-size:12px;font-weight:700;color:var(--fire)}
+.cell .x{position:absolute;left:8px;right:26px;bottom:6px;display:flex;flex-wrap:wrap;gap:1px 6px;font-size:11px;font-weight:700;line-height:1.3;color:var(--fire)}
 [data-e="水"]{color:var(--water)}[data-e="木"]{color:var(--wood)}[data-e="火"]{color:var(--fire)}[data-e="土"]{color:var(--earth)}[data-e="金"]{color:var(--metal)}
 .cap{text-align:center;font-size:13px;color:var(--sub);margin:0 0 26px;white-space:pre-line}
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px}
@@ -216,9 +216,10 @@ function calcStars(y,m,d){
 function place(c){const o={};ORDER.forEach((p,k)=>o[p]=wrap(c+k));return o}
 const find=(pl,s)=>Object.keys(pl).find(p=>pl[p]===s);
 const ST=n=>C.fixed.stars[n-1];
+const ABBR={五黄殺:"五黄",暗剣殺:"暗剣",本命殺:"本命",本命的殺:"的殺",歳破:"歳破",月破:"月破"};
 function board(pl,me,bad){
   return '<div class="board">'+GRID.map(p=>{const s=pl[p],st=ST(s);
-    return `<div class="cell${me===s?" me":""}${bad&&bad.includes(p)?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad.includes(p)?'<span class="x">凶</span>':""}</div>`}).join("")+"</div>";
+    return `<div class="cell${me===s?" me":""}${bad&&bad[p]?" bad":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad[p]?`<span class="x">${bad[p].map(n=>`<span>${ABBR[n]||n}</span>`).join("")}</span>`:""}</div>`}).join("")+"</div>";
 }
 const esc=s=>String(s).replace(/\r\n?/g,"\n").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const t=(k,o)=>String(T[k]??"").replace(/\{(\w+)\}/g,(m,x)=>o&&x in o?o[x]:m);
@@ -240,11 +241,12 @@ function fortune(){
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const saiha=yearBreak(BY),bad=[five,anken,honSat,honTeki,saiha].filter(x=>x&&x!=="中");
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===honmeiInfo.el||GEN[ST(pl[p]).el]===honmeiInfo.el));
+  const ytypes={},addT=(p,n)=>{if(p&&p!=="中")(ytypes[p]=ytypes[p]||[]).push(n)};addT(five,"五黄殺");addT(anken,"暗剣殺");addT(honSat,"本命殺");addT(honTeki,"本命的殺");addT(saiha,"歳破");
   const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");names.push("歳破");
   const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
   const bodyCard=(honmeiInfo.body||honmeiInfo.care)?`<div class="card"><h3>${tx("h_body")}</h3>${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p></div>`:"";
-  $("hero").innerHTML=board(pl,honmeiStar,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
+  $("hero").innerHTML=board(pl,honmeiStar,ytypes)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
   out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
   ${setsuiNote(y,m,d,t("who_input"))}
   <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p class="pl">${honmeiInfo.text}</p></div>
@@ -369,7 +371,7 @@ function renderDirs(n,k){
   const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
     return `<tr${j===k?' class="now"':""}><th scope="row">${((j+1)%12)+1}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
-  box.innerHTML=board(pl,n,Object.keys(types))+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>
+  box.innerHTML=board(pl,n,types)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>
   <h4>${tx("h_dir_good",{month:mm})}</h4>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}
   <h4>${tx("h_dir_bad",{month:mm})}</h4>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}
   <h4>${tx("h_dir_all")}</h4><div class="tw"><table class="dtab"><thead><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col" class="g">${tx("dir_lbl_good")}</th><th scope="col" class="b">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p>`;
