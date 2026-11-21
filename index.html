@@ -310,7 +310,9 @@ function compat(){
   if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
   const youName=$("n2").value.trim().slice(0,20),partnerName=$("n3").value.trim().slice(0,20);
   const youStar=honmeiOf(a),partnerStar=honmeiOf(b),ex=ST(youStar).el,ey=ST(partnerStar).el;
-  const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",r=C.fixed.relations[k];
+  const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",dY=youName?esc(youName)+"さん":t("legend_you"),dP=partnerName?esc(partnerName)+"さん":t("legend_partner");
+  let r=C.fixed.relations[k];
+  if(C.fixed.pairs){const p=C.fixed.pairs[Math.min(youStar,partnerStar)*10+Math.max(youStar,partnerStar)],youIsA=p.a===youStar,nA=youIsA?dY:dP,nB=youIsA?dP:dY,fill=x=>x.replace(/\{A\}/g,nA).replace(/\{B\}/g,nB);r={score:p.score,label:fill(p.label),text:fill(p.text)}}
   const who=(label,nm,st)=>`<span class="rl">${nm?esc(nm)+"さん":label}：<span data-e="${st.el}">${st.name}の${st.el}</span></span>`;
   const title=who(t("legend_you"),youName,ST(youStar))+who(t("legend_partner"),partnerName,ST(partnerStar));
   const hYou=youName?tx("h_you_named",{name:youName,star:ST(youStar).name}):tx("h_you",{star:ST(youStar).name});
@@ -319,7 +321,7 @@ function compat(){
   out.innerHTML=`<h2 class="rhead">${title}</h2>
   ${setsuiNote(ya,ma,da,t("legend_you"))}${setsuiNote(yb,mb,db,t("legend_partner"))}
   ${relationFig(youStar,partnerStar,youName,partnerName)}
-  <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p>${r.text}</p></div>
+  <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p class="pl">${r.text}</p></div>
   ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
   <div class="card"><h3>${hYou}</h3><p class="pl">${ST(youStar).text}</p></div>
   <div class="card"><h3>${hPartner}</h3><p class="pl">${ST(partnerStar).text}</p></div>
@@ -442,10 +444,22 @@ function parse(wb){
   g("月運").forEach((r,i)=>{if(blank(r))return;const p=r[0];if(!PAL.includes(p)){E("月運",i,"方位は 中・乾・兌・艮・離・坎・坤・震・巽 のどれかです");return}
     if(!r[1]||!r[2])E("月運",i,"タイトルまたは説明が空です");pm[p]={t:r[1],s:r[2]}});
   PAL.forEach(p=>{if(!py[p])errs.push(`「年運」シートに「${p}」の行がありません`);if(!pm[p])errs.push(`「月運」シートに「${p}」の行がありません`)});
-  const rel={},rr=g("相性");
-  ["same","give","recv","win","lose"].forEach((k,i)=>{const r=rr[i]||[];const sc=+r[1];
-    if(!(sc>=0&&sc<=100&&r[1]!==""))E("相性",i,"点数は0〜100の数字にしてください");
-    if(!r[2]||!r[3])E("相性",i,"見出しまたは説明が空です");rel[k]={score:sc,label:r[2],text:r[3]}});
+  const rel={},pairs={},rr=g("相性");
+  const w6=wb.Sheets["相性"],head6=w6?(XLSX.utils.sheet_to_json(w6,{header:1,defval:""})[0]||[]):[],pairMode=String(head6[0]).trim()==="星A";
+  if(pairMode){ // 星の組み合わせ（45通り）。星A・星Bの順は問わない。{A}＝星Aの方、{B}＝星Bの方の名前に置き換わる
+    const no=nm=>stars.findIndex(x=>x.name===nm)+1;
+    rr.forEach((r,i)=>{if(blank(r))return;const a=no(r[0]),b=no(r[1]);
+      if(!a||!b){E("相性",i,"星A・星Bは、九星シートの星の名前（例：一白水星）にしてください");return}
+      const sc=+r[3];if(!(sc>=0&&sc<=100&&r[3]!==""))E("相性",i,"点数は0〜100の数字にしてください");
+      if(!r[4]||!r[5])E("相性",i,"見出しまたは説明が空です");
+      const key=Math.min(a,b)*10+Math.max(a,b);if(pairs[key])E("相性",i,"同じ星の組み合わせが2回あります");
+      pairs[key]={a,b,score:sc,label:r[4],text:String(r[5]).replace(/\r\n?/g,"\n")}});
+    for(let a=1;a<=9;a++)for(let b=a;b<=9;b++)if(!pairs[a*10+b])errs.push(`「相性」シートに「${stars[a-1]?stars[a-1].name:a}」と「${stars[b-1]?stars[b-1].name:b}」の組み合わせの行がありません`);
+  }else{ // 従来の形式（五行の関係5種類）
+    ["same","give","recv","win","lose"].forEach((k,i)=>{const r=rr[i]||[];const sc=+r[1];
+      if(!(sc>=0&&sc<=100&&r[1]!==""))E("相性",i,"点数は0〜100の数字にしてください");
+      if(!r[2]||!r[3])E("相性",i,"見出しまたは説明が空です");rel[k]={score:sc,label:r[2],text:r[3]}});
+  }
   const ov={};
   g("節入り補正").forEach((r,i)=>{if(blank(r.slice(0,3)))return;const[y,m,d]=r.slice(0,3).map(Number);
     if(!(y>=1901&&y<=2099&&m>=1&&m<=12&&d>=1&&d<=10&&[y,m,d].every(Number.isInteger)))E("節入り補正",i,"年・月・日を正しい数字で入れてください（日は節入りの日で1〜10）");
@@ -491,7 +505,7 @@ function parse(wb){
       PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
       cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{dirs:dg,actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
+  return{dirs:dg,actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel,pairs:pairMode?pairs:null},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;DIRS=C.dirs;initActions();
