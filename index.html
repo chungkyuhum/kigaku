@@ -51,6 +51,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
 .card h3{margin:0 0 4px;font-size:16px}
 .card p{margin:0}.pl{white-space:pre-line}
+#hero{margin-top:24px}
 .mapwrap{margin:0 0 26px}.mapwrap h3{margin:0 0 10px;font-size:17px}
 .mapbox{position:relative;aspect-ratio:1/1;max-width:560px;margin:0 auto;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .mapbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
@@ -110,8 +111,6 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 <div class="dragon"><img src="dragon.jpg" alt="" width="1200" height="675" decoding="async" onerror="this.parentNode.hidden=true"></div>
 <p class="lead" data-t="lead"></p>
 
-<div id="hero"></div>
-<div id="mapbox" class="mapwrap" hidden></div>
 
 <div class="tabs" role="tablist">
   <button role="tab" id="t1" aria-selected="true" aria-controls="p1" data-t="tab1"></button>
@@ -128,6 +127,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
   </fieldset>
   <p class="priv" data-t="privacy"></p>
   <button class="go" id="b1" data-t="btn_fortune"></button>
+  <div id="hero"></div>
   <div class="res" id="r1" aria-live="polite"></div>
 </section>
 
@@ -245,7 +245,6 @@ function fortune(){
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
   const bodyCard=(honmeiInfo.body||honmeiInfo.care)?`<div class="card"><h3>${tx("h_body")}</h3>${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p></div>`:"";
   $("hero").innerHTML=board(pl,honmeiStar,bad)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
-  drawMap(good,bad);
   out.innerHTML=`<h2>${nm?tx("res_title_named",{name:nm}):tx("res_title")}</h2>
   ${setsuiNote(y,m,d,t("who_input"))}
   <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p class="pl">${honmeiInfo.text}</p></div>
@@ -253,6 +252,7 @@ function fortune(){
   <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p class="pl">${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
+  <div id="mapbox" class="mapwrap" hidden></div>
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
   <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
   <div class="card"><h3>${tx("h_bad")}</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||tx("bad_none")}</p>
@@ -260,6 +260,7 @@ function fortune(){
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
   <div class="card"><h3>${tx("h_dir")}</h3><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label><div id="dirbox"></div></div>`;
+  drawMap(good,bad);
   initDirs(honmeiStar);
 }
 function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d).honmei}
@@ -332,7 +333,6 @@ function monthDirs(n,k){
 // 年盤の下の地図：Googleマップの埋め込み(iframe)の上に、8方位の扇形（東西南北30°・斜め60°）を中央固定で重ねる
 // 地図の向きは北が上。扇形は pointer-events:none なので、地図は普通に動かせる。
 const MAPDIR=[["坎",0],["艮",45],["震",90],["巽",135],["離",180],["坤",225],["兌",270],["乾",315]];
-let mapSvg=null,mapCap=null;
 function mapSvgHtml(good,bad){
   const R=50,pt=(r,a)=>[50+r*Math.sin(a*Math.PI/180),50-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(2));
   let o="";
@@ -349,13 +349,12 @@ function drawMap(good,bad){
   const box=$("mapbox");if(!box)return;
   const v=String(T.map_url||"").trim(),m=/src\s*=\s*"([^"]+)"/.exec(v),url=(m?m[1]:v).replace(/&amp;/g,"&");
   if(!/^https:\/\/www\.google\.com\/maps\/embed\?/.test(url)){box.hidden=true;return}
-  const title=T.map_title||"方位を地図で確かめる",cap=(good.length||bad.length)?(T.map_cap_me||T.map_cap):T.map_cap;
-  if(!mapSvg){
-    box.innerHTML=`<h3></h3><div class="mapbox"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><svg viewBox="0 0 100 100" aria-hidden="true"></svg></div><p class="cap pl"></p>`;
-    box.querySelector("iframe").src=url;mapSvg=box.querySelector("svg");mapCap=box.querySelector(".cap");
-  }
-  box.querySelector("h3").textContent=title;box.querySelector("iframe").title=title;
-  mapSvg.innerHTML=mapSvgHtml(good,bad);mapCap.textContent=cap||"";mapCap.hidden=!cap;box.hidden=false;
+  const title=T.map_title||"方位を地図で確かめる",cap=T.map_cap_me||T.map_cap||"";
+  box.innerHTML=`<h3></h3><div class="mapbox"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><svg viewBox="0 0 100 100" aria-hidden="true"></svg></div><p class="cap pl"></p>`;
+  box.querySelector("h3").textContent=title;
+  const fr=box.querySelector("iframe");fr.title=title;fr.src=url;
+  box.querySelector("svg").innerHTML=mapSvgHtml(good,bad);
+  const c=box.querySelector(".cap");c.textContent=cap;c.hidden=!cap;box.hidden=false;
 }
 // 吉方位の作用：方徳 → 方災 の順に続けて表示（セル内の改行はそのまま反映）
 function goodText(g){
@@ -495,7 +494,6 @@ fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx �
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
   $("hero").innerHTML=board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
-  drawMap([],[]);
 }).catch(e=>{$("hero").innerHTML='<div class="card"><h3 class="err">データを読み込めません</h3>'+(Array.isArray(e)?e:["content.xlsx を読み込めませんでした。Webサーバー経由で開いているか確認してください"]).map(x=>`<p class="err">${x}</p>`).join("")+"</div>"});
 </script>
 </body>
