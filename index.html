@@ -174,6 +174,8 @@ const ORDER=["中","乾","兌","艮","離","坎","坤","震","巽"];
 const DIR={巽:"南東",離:"南",坤:"南西",震:"東",中:"中央",兌:"西",艮:"北東",坎:"北",乾:"北西"};
 const OPP={坎:"離",離:"坎",坤:"艮",艮:"坤",震:"兌",兌:"震",巽:"乾",乾:"巽"};
 // 十二支（子丑寅卯辰巳午未申酉戌亥）が入る方位。歳破・月破は、その十二支の反対側（六冲）の方位
+// 吉方位の判定：本命星と同じ五行（比和）、または相生の関係（本命星を生む五行・本命星に生まれる五行）
+const isGoodEl=(el,pe)=>pe===el||GEN[pe]===el||GEN[el]===pe;
 const BRDIR=["坎","艮","艮","震","巽","巽","離","坤","坤","兌","乾","乾"];
 const yearBreak=by=>BRDIR[((((by-4)%12)+12)%12+6)%12];   // 歳破：年の十二支の反対側（子＝4年）
 const monthBreak=i=>BRDIR[(i+8)%12];                      // 月破：月の十二支の反対側（i=0 が寅月）
@@ -243,7 +245,7 @@ function fortune(){
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const mpos=find(pl,getsumeiStar),getSat=mpos==="中"?null:mpos,getTeki=mpos==="中"?null:OPP[mpos]; // 月命殺・月命的殺（月命星が入る方位とその反対側）
   const saiha=yearBreak(BY),bad=[five,anken,honSat,honTeki,getSat,getTeki,saiha].filter(x=>x&&x!=="中");
-  const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===honmeiInfo.el||GEN[ST(pl[p]).el]===honmeiInfo.el));
+  const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&isGoodEl(honmeiInfo.el,ST(pl[p]).el));
   const ytypes={},addT=(p,n)=>{if(p&&p!=="中")(ytypes[p]=ytypes[p]||[]).push(n)};addT(five,"五黄殺");addT(anken,"暗剣殺");addT(honSat,"本命殺");addT(honTeki,"本命的殺");addT(getSat,"月命殺");addT(getTeki,"月命的殺");addT(saiha,"歳破");
   const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");if(getSat)names.push("月命殺","月命的殺");names.push("歳破");
   const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
@@ -339,7 +341,7 @@ function monthDirs(n,k){
   if(MS){const mp=find(pl,MS);add(mp,"月命殺");add(mp==="中"?null:OPP[mp],"月命的殺")}
   add(monthBreak(k),"月破");
   const el=ST(n).el;
-  return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&(ST(pl[p]).el===el||GEN[ST(pl[p]).el]===el))};
+  return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&isGoodEl(el,ST(pl[p]).el))};
 }
 // 年盤の下の地図：Googleマップの埋め込み(iframe)の上に、8方位の扇形（東西南北30°・斜め60°）を中央固定で重ねる
 // 地図の向きは北が上。扇形は pointer-events:none なので、地図は普通に動かせる。
