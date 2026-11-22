@@ -218,7 +218,7 @@ function calcStars(y,m,d){
 function place(c){const o={};ORDER.forEach((p,k)=>o[p]=wrap(c+k));return o}
 const find=(pl,s)=>Object.keys(pl).find(p=>pl[p]===s);
 const ST=n=>C.fixed.stars[n-1];
-const ABBR={五黄殺:"五黄",暗剣殺:"暗剣",本命殺:"本命",本命的殺:"的殺",歳破:"歳破",月破:"月破"};
+const ABBR={五黄殺:"五黄",暗剣殺:"暗剣",本命殺:"本命",本命的殺:"本的",月命殺:"月命",月命的殺:"月的",歳破:"歳破",月破:"月破"};
 function board(pl,me,bad,good){
   return '<div class="board">'+GRID.map(p=>{const s=pl[p],st=ST(s);
     return `<div class="cell${me===s?" me":""}${bad&&bad[p]?" bad":good&&good.includes(p)?" good":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad[p]?`<span class="x">${bad[p].map(n=>`<span>${ABBR[n]||n}</span>`).join("")}</span>`:good&&good.includes(p)?'<span class="x ok"><span>吉</span></span>':""}</div>`}).join("")+"</div>";
@@ -241,10 +241,11 @@ function fortune(){
   const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
   const pl=place(center(BY)),pos=find(pl,honmeiStar),f=C.yearly.palaceYear[pos];
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
-  const saiha=yearBreak(BY),bad=[five,anken,honSat,honTeki,saiha].filter(x=>x&&x!=="中");
+  const mpos=find(pl,getsumeiStar),getSat=mpos==="中"?null:mpos,getTeki=mpos==="中"?null:OPP[mpos]; // 月命殺・月命的殺（月命星が入る方位とその反対側）
+  const saiha=yearBreak(BY),bad=[five,anken,honSat,honTeki,getSat,getTeki,saiha].filter(x=>x&&x!=="中");
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&(ST(pl[p]).el===honmeiInfo.el||GEN[ST(pl[p]).el]===honmeiInfo.el));
-  const ytypes={},addT=(p,n)=>{if(p&&p!=="中")(ytypes[p]=ytypes[p]||[]).push(n)};addT(five,"五黄殺");addT(anken,"暗剣殺");addT(honSat,"本命殺");addT(honTeki,"本命的殺");addT(saiha,"歳破");
-  const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");names.push("歳破");
+  const ytypes={},addT=(p,n)=>{if(p&&p!=="中")(ytypes[p]=ytypes[p]||[]).push(n)};addT(five,"五黄殺");addT(anken,"暗剣殺");addT(honSat,"本命殺");addT(honTeki,"本命的殺");addT(getSat,"月命殺");addT(getTeki,"月命的殺");addT(saiha,"歳破");
+  const names=["五黄殺"];if(anken)names.push("暗剣殺");if(honSat)names.push("本命殺","本命的殺");if(getSat)names.push("月命殺","月命的殺");names.push("歳破");
   const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
   const bodyCard=(honmeiInfo.body||honmeiInfo.care)?`<div class="card"><h3>${tx("h_body")}</h3>${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p></div>`:"";
@@ -265,6 +266,7 @@ function fortune(){
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
   <div class="card"><h3>${tx("h_dir")}</h3><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label><div id="dirbox"></div></div>`;
   drawMap(good,bad);
+  MS=getsumeiStar;
   initDirs(honmeiStar);
 }
 function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m,d).honmei}
@@ -329,10 +331,13 @@ function compat(){
 }
 // 月ごとの方位
 const ORD_DIR=["坎","艮","震","巽","離","坤","兌","乾"];
+let MS=0; // いま鑑定している人の月命星（月盤の月命殺・月命的殺に使う）
 function monthDirs(n,k){
   const pl=place(monthStar(BY,k)),pos=find(pl,n),five=find(pl,5),types={};
   const add=(p,tp)=>{if(p&&p!=="中")(types[p]=types[p]||[]).push(tp)};
-  add(five,"五黄殺");add(five==="中"?null:OPP[five],"暗剣殺");add(pos,"本命殺");add(pos==="中"?null:OPP[pos],"本命的殺");add(yearBreak(BY),"歳破");add(monthBreak(k),"月破");
+  add(five,"五黄殺");add(five==="中"?null:OPP[five],"暗剣殺");add(pos,"本命殺");add(pos==="中"?null:OPP[pos],"本命的殺");
+  if(MS){const mp=find(pl,MS);add(mp,"月命殺");add(mp==="中"?null:OPP[mp],"月命的殺")}
+  add(monthBreak(k),"月破");
   const el=ST(n).el;
   return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&(ST(pl[p]).el===el||GEN[ST(pl[p]).el]===el))};
 }
@@ -476,7 +481,7 @@ function parse(wb){
   else{const rows=g("吉方位の作用");for(let k=0;k<9;k++){const r=rows[k]||[];if(!r[1])DE("吉方位の作用",k,"方徳の作用の文章が空です");dg.good.push({toku:r[1]||"",sai:r[2]||""})}}
   if(!wb.Sheets["凶方位の作用"])dg.errors.push("「凶方位の作用」シートが見つかりません");
   else{g("凶方位の作用").forEach((r,i)=>{if(r[0]){dg.bad[r[0]]=r[1];if(!r[1])DE("凶方位の作用",i,"作用の文章が空です")}});
-    ["五黄殺","暗剣殺","本命殺","本命的殺","歳破","月破"].forEach(k=>{if(!(k in dg.bad))dg.errors.push(`「凶方位の作用」シートに「${k}」の行がありません`)})}
+    ["五黄殺","暗剣殺","本命殺","本命的殺","月命殺","月命的殺","歳破","月破"].forEach(k=>{if(!(k in dg.bad))dg.errors.push(`「凶方位の作用」シートに「${k}」の行がありません`)})}
   const act={},aerr=[],aw=wb.Sheets["行動表"];
   const AE=(i,m)=>aerr.push(`「行動表」シートの${i+2}行目：${m}`);
   if(aw)XLSX.utils.sheet_to_json(aw,{header:1,defval:""}).slice(1).forEach((r,i)=>{r=r.map(t);if(blank(r.slice(0,5)))return;
