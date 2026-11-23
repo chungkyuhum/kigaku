@@ -55,7 +55,6 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .card h3{margin:0 0 4px;font-size:16px}
 .card p{margin:0}.pl{white-space:pre-line}
 #hero{margin-top:24px}
-#dirbox{margin-top:18px}
 .mapwrap{margin:0 0 26px}.mapwrap h3{margin:0 0 10px;font-size:17px}
 .mapbox{position:relative;aspect-ratio:1/1;max-width:560px;margin:0 auto;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .mapbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
@@ -268,7 +267,9 @@ function fortune(){
   <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("bad_note",{names:names.join("・")})}</p></div>
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
-  <div class="card"><h3>${tx("h_dir")}</h3><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label><div id="dirbox"></div></div>`;
+  <fieldset><legend>${tx("h_dir")}</legend><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label></fieldset>
+  <div id="dirboard"></div>
+  <div class="card" id="dirbox"></div>`;
   drawMap(good,bad);
   MS=getsumeiStar;
   initDirs(honmeiStar);
@@ -377,15 +378,15 @@ function goodText(g){
   return `<span class="pl">${parts.join("\n\n")}</span>`;
 }
 function renderDirs(n,k){
-  const box=$("dirbox");
-  if(DIRS.errors.length){box.innerHTML=DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("");return}
+  const box=$("dirbox"),bd=$("dirboard");
+  if(DIRS.errors.length){bd.innerHTML="";box.innerHTML=DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("");return}
   const mm=((k+1)%12)+1,{pl,types,good}=monthDirs(n,k);
   const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join("");
   const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
     return `<tr${j===k?' class="now"':""}><th scope="row">${((j+1)%12)+1}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
-  box.innerHTML=board(pl,n,types,good)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>
-  <h4>${tx("h_dir_good",{month:mm})}</h4>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}
+  bd.innerHTML=board(pl,n,types,good)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>`;
+  box.innerHTML=`<h4>${tx("h_dir_good",{month:mm})}</h4>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}
   <h4>${tx("h_dir_bad",{month:mm})}</h4>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}
   <h4>${tx("h_dir_all")}</h4><div class="tw"><table class="dtab"><thead><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col" class="g">${tx("dir_lbl_good")}</th><th scope="col" class="b">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p>`;
 }
