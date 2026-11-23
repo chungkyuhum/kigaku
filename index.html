@@ -260,7 +260,6 @@ function fortune(){
   <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p class="pl">${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
-  <div id="mapbox" class="mapwrap" hidden></div>
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
   <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
   <div class="card"><h3>${tx("h_bad")}</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||tx("bad_none")}</p>
@@ -269,6 +268,7 @@ function fortune(){
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
   <fieldset><legend>${tx("h_dir")}</legend><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label></fieldset>
   <div id="dirboard"></div>
+  <div id="mapbox" class="mapwrap" hidden></div>
   <div id="dirbox"></div>`;
   drawMap(good,bad);
   MS=getsumeiStar;
@@ -346,32 +346,40 @@ function monthDirs(n,k){
   const el=ST(n).el;
   return {pl,types,good:ORD_DIR.filter(p=>!types[p]&&isGoodEl(el,ST(pl[p]).el))};
 }
-// 年盤の下の地図：Googleマップの埋め込み(iframe)の上に、8方位の扇形（東西南北30°・斜め60°）を中央固定で重ねる
-// 地図の向きは北が上。扇形は pointer-events:none なので、地図は普通に動かせる。
+// 地図：Googleマップの埋め込み(iframe)の上に、8方位の扇形（東西南北30°・斜め60°）を中央固定で重ねる。地図は北が上。
+// 扇形は、内側（中心から2/3）＝選んだ月の吉凶、外側の輪（残り1/3）＝今年の吉凶。緑＝吉、赤＝凶。pointer-events:none なので、地図は普通に動かせる。
 const MAPDIR=[["坎",0],["艮",45],["震",90],["巽",135],["離",180],["坤",225],["兌",270],["乾",315]];
-function mapSvgHtml(good,bad){
-  const R=50,pt=(r,a)=>[50+r*Math.sin(a*Math.PI/180),50-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(2));
-  let o="";
+let MAPY={good:[],bad:[]},MAPM={good:[],bad:[],mm:""};
+function mapSvgHtml(yg,yb,mg,mb){
+  const R=50,R2=100/3,pt=(r,a)=>[50+r*Math.sin(a*Math.PI/180),50-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(2));
+  const col=(g,b,p,al)=>b.includes(p)?`rgba(214,62,50,${al})`:g.includes(p)?`rgba(52,160,84,${al})`:"rgba(190,215,255,.28)";
+  let o="",lab="";
   MAPDIR.forEach(([p,c])=>{
-    const half=c%90===0?15:30,[x0,y0]=pt(R,c-half),[x1,y1]=pt(R,c+half);
-    const fill=bad.includes(p)?"rgba(214,62,50,.36)":good.includes(p)?"rgba(52,160,84,.36)":"rgba(190,215,255,.28)";
-    o+=`<path d="M50,50 L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" fill="${fill}" stroke="#fff" stroke-width=".45" stroke-linejoin="round"/>`;
-    const [lx,ly]=pt(c%90===0?41:39,c);
-    o+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="3.3" font-weight="700" fill="#fff" stroke="#14478f" stroke-width=".9" paint-order="stroke" stroke-linejoin="round">${DIR[p]}${c%90===0?"30":"60"}°</text>`;
+    const h=c%90===0?15:30,a0=c-h,a1=c+h,[x0,y0]=pt(R,a0),[x1,y1]=pt(R,a1),[u0,v0]=pt(R2,a0),[u1,v1]=pt(R2,a1);
+    o+=`<path d="M${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} L${u1},${v1} A${R2},${R2} 0 0 0 ${u0},${v0} Z" fill="${col(yg,yb,p,.40)}" stroke="#fff" stroke-opacity=".5" stroke-width=".45" stroke-linejoin="round"/>`;
+    o+=`<path d="M50,50 L${u0},${v0} A${R2},${R2} 0 0 1 ${u1},${v1} Z" fill="${col(mg,mb,p,.46)}" stroke="#fff" stroke-opacity=".5" stroke-width=".45" stroke-linejoin="round"/>`;
+    const [lx,ly]=pt(42,c);
+    lab+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="3.8" font-weight="700" fill="#fff" stroke="#14478f" stroke-width=".9" paint-order="stroke" stroke-linejoin="round">${DIR[p]}</text>`;
   });
-  return o+`<circle cx="50" cy="50" r="1.3" fill="#e5001a" stroke="#fff" stroke-width=".5"/>`;
+  return o+`<circle cx="50" cy="50" r="${R2.toFixed(2)}" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width=".6"/>`+lab+`<circle cx="50" cy="50" r="1.3" fill="#e5001a" fill-opacity=".55" stroke="#fff" stroke-opacity=".55" stroke-width=".5"/>`;
 }
-function drawMap(good,bad){
+function refreshMap(){
+  const box=$("mapbox");if(!box||box.hidden)return;
+  box.querySelector("svg").innerHTML=mapSvgHtml(MAPY.good,MAPY.bad,MAPM.good,MAPM.bad);
+  const cap=String(T.map_cap_me||T.map_cap||"").replace(/\{month\}/g,MAPM.mm),c=box.querySelector(".cap");c.textContent=cap;c.hidden=!cap;
+}
+function drawMap(good,bad){ // 鑑定のたびに作る（年の吉凶＝外側の輪）。内側（月）は、月を選ぶたびに setMapMonth で更新する
   const box=$("mapbox");if(!box)return;
   const v=String(T.map_url||"").trim(),m=/src\s*=\s*"([^"]+)"/.exec(v),url=(m?m[1]:v).replace(/&amp;/g,"&");
   if(!/^https:\/\/www\.google\.com\/maps\/embed\?/.test(url)){box.hidden=true;return}
-  const title=T.map_title||"方位を地図で確かめる",cap=T.map_cap_me||T.map_cap||"";
+  const title=T.map_title||"方位を地図で確かめる";
+  MAPY={good,bad};MAPM={good:[],bad:[],mm:""};
   box.innerHTML=`<h3></h3><div class="mapbox"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><svg viewBox="0 0 100 100" aria-hidden="true"></svg></div><p class="cap pl"></p>`;
   box.querySelector("h3").textContent=title;
   const fr=box.querySelector("iframe");fr.title=title;fr.src=url;
-  box.querySelector("svg").innerHTML=mapSvgHtml(good,bad);
-  const c=box.querySelector(".cap");c.textContent=cap;c.hidden=!cap;box.hidden=false;
+  box.hidden=false;refreshMap();
 }
+function setMapMonth(good,bad,mm){MAPM={good,bad,mm};refreshMap()}
 // 吉方位の作用：方徳 → 方災 の順に続けて表示（セル内の改行はそのまま反映）
 function goodText(g){
   const parts=[["lbl_hotoku","【方徳】",g.toku],["lbl_hosai","【方災】",g.sai]].filter(x=>x[2]).map(x=>(T[x[0]]||x[1])+"\n"+esc(x[2]));
@@ -385,6 +393,7 @@ function renderDirs(n,k){
   const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
     return `<tr${j===k?' class="now"':""}><th scope="row">${((j+1)%12)+1}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
+  setMapMonth(good,Object.keys(types),mm);
   bd.innerHTML=board(pl,n,types,good)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>`;
   box.innerHTML=`<div class="card"><h3>${tx("h_dir_good",{month:mm})}</h3>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}</div>
   <div class="card"><h3>${tx("h_dir_bad",{month:mm})}</h3>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}</div>
