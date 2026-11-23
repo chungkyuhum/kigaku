@@ -260,15 +260,15 @@ function fortune(){
   <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p class="pl">${getsumeiInfo.text}</p></div>
   <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
   ${cats}
-  <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
-  <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
-  <div class="card"><h3>${tx("h_bad")}</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||tx("bad_none")}</p>
-  <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("bad_note",{names:names.join("・")})}</p></div>
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
   <fieldset><legend>${tx("h_dir")}</legend><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label></fieldset>
   <div id="dirboard"></div>
   <div id="mapbox" class="mapwrap" hidden></div>
+  <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
+  <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
+  <div class="card"><h3>${tx("h_bad")}</h3><p>${[...new Set(bad)].map(p=>`<span class="dir">${DIR[p]}</span>`).join("")||tx("bad_none")}</p>
+  <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("bad_note",{names:names.join("・")})}</p></div>
   <div id="dirbox"></div>`;
   drawMap(good,bad);
   MS=getsumeiStar;
