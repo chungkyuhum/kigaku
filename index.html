@@ -49,6 +49,12 @@ legend{font-weight:500;padding:0 6px}
 label{display:flex;flex-direction:column;font-size:14px;color:var(--sub);flex:1;min-width:140px}
 input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;margin-top:4px;min-height:44px}
 .go{width:100%;min-height:48px;background:var(--ink);color:var(--bg);border:0;border-radius:8px;font:500 17px "Noto Sans JP",sans-serif;cursor:pointer}
+.mnav{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 8px 8px 16px;margin:12px 0}
+.mnav[hidden]{display:none}
+.mnav .mt{font-weight:500}
+.mnav .mb{display:flex;gap:8px;flex:none}
+.mnav button{min-width:52px;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;cursor:pointer}
+.mnav button[aria-disabled="true"]{opacity:.35;cursor:default}
 .res{margin-top:26px}
 .res h2{font-size:24px;margin:0 0 4px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
@@ -262,8 +268,8 @@ function fortune(){
   ${cats}
   <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
-  <fieldset><legend>${tx("h_dir")}</legend><label><span>${tx("lbl_dirmonth")}</span><select id="dm"></select></label></fieldset>
   <div id="dirboard"></div>
+  <div class="mnav" id="mnav" hidden><span class="mt" id="mtxt" aria-live="polite"></span><span class="mb"><button type="button" id="mprev" aria-label="${esc(T.btn_mprev||"前の月")}">◀</button><button type="button" id="mnext" aria-label="${esc(T.btn_mnext||"次の月")}">▶</button></span></div>
   <div id="mapbox" class="mapwrap" hidden></div>
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
   <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
@@ -385,24 +391,30 @@ function goodText(g){
   const parts=[["lbl_hotoku","【方徳】",g.toku],["lbl_hosai","【方災】",g.sai]].filter(x=>x[2]).map(x=>(T[x[0]]||x[1])+"\n"+esc(x[2]));
   return `<span class="pl">${parts.join("\n\n")}</span>`;
 }
+function mLabel(k){return k===11?"翌1":String(((k+1)%12)+1)} // 節入りの月は2月〜翌1月。最終月は「翌1月」と表示する
 function renderDirs(n,k){
-  const box=$("dirbox"),bd=$("dirboard");
-  if(DIRS.errors.length){bd.innerHTML="";box.innerHTML=`<div class="card">${DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("")}</div>`;return}
-  const mm=((k+1)%12)+1,{pl,types,good}=monthDirs(n,k);
+  const box=$("dirbox"),bd=$("dirboard"),nav=$("mnav");
+  if(DIRS.errors.length){if(nav)nav.hidden=true;bd.innerHTML="";box.innerHTML=`<div class="card">${DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("")}</div>`;return}
+  const mm=mLabel(k),{pl,types,good}=monthDirs(n,k);
+  if(nav){nav.hidden=false;$("mtxt").textContent=tx("h_dir")+"："+mm+"月";
+    $("mprev").setAttribute("aria-disabled",k<=0);$("mnext").setAttribute("aria-disabled",k>=11)}
   const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join("");
   const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),g=r.good.map(p=>DIR[p]).join("・")||"－",b=ORD_DIR.filter(p=>r.types[p]).map(p=>DIR[p]).join("・")||"－";
-    return `<tr${j===k?' class="now"':""}><th scope="row">${((j+1)%12)+1}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
+    return `<tr${j===k?' class="now"':""}><th scope="row">${mLabel(j)}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
   setMapMonth(good,Object.keys(types),mm);
   bd.innerHTML=board(pl,n,types,good)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>`;
   box.innerHTML=`<div class="card"><h3>${tx("h_dir_good",{month:mm})}</h3>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}</div>
   <div class="card"><h3>${tx("h_dir_bad",{month:mm})}</h3>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}</div>
   <div class="card"><h3>${tx("h_dir_all")}</h3><div class="tw"><table class="dtab"><thead><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col" class="g">${tx("dir_lbl_good")}</th><th scope="col" class="b">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p></div>`;
 }
+let DK=0; // いま選んでいる月（0＝2月 … 11＝翌1月）
 function initDirs(n){
-  const sel=$("dm");if(!sel)return;
-  sel.innerHTML=Array.from({length:12},(_,k)=>`<option value="${k}">${((k+1)%12)+1}月</option>`).join("");
-  sel.value=TI;sel.onchange=()=>renderDirs(n,+sel.value);renderDirs(n,TI);
+  const pv=$("mprev"),nx=$("mnext");if(!pv||!nx)return;
+  DK=TI;
+  const go=d=>{const k=DK+d;if(k<0||k>11)return;DK=k;renderDirs(n,DK)};
+  pv.onclick=()=>go(-1);nx.onclick=()=>go(1);
+  renderDirs(n,DK);
 }
 // 行動表
 function todayMsg(){
