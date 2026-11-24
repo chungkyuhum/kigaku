@@ -195,7 +195,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "good_note", "h_bad", "bad_none", "bad_note", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -271,7 +271,7 @@ function fortune(){
   <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>
   <h2 class="sect dirh">${tx("res_title_dir")}</h2>
   <div id="dirboard"></div>
-  <div class="mnav" id="mnav" hidden><span class="mt" id="mtxt" aria-live="polite"></span><span class="mb"><button type="button" id="mprev" aria-label="${esc(T.btn_mprev||"前の月")}">◀</button><button type="button" id="mnext" aria-label="${esc(T.btn_mnext||"次の月")}">▶</button></span></div>
+  <div class="mnav" id="mnav" hidden><span class="mt" id="mtxt" aria-live="polite"></span><span class="mb"><button type="button" id="mprev" aria-label="${esc(T.btn_mprev)}">◀</button><button type="button" id="mnext" aria-label="${esc(T.btn_mnext)}">▶</button></span></div>
   <div id="mapbox" class="mapwrap" hidden></div>
   <div class="card"><h3>${tx("h_good")}</h3><p>${good.length?good.map(p=>`<span class="dir">${DIR[p]}</span>`).join(""):tx("good_none")}</p>
   <p style="font-size:14px;color:var(--sub);margin-top:6px">${tx("good_note")}</p></div>
@@ -380,17 +380,17 @@ function drawMap(good,bad){ // 鑑定のたびに作る（年の吉凶＝外側�
   const box=$("mapbox");if(!box)return;
   const v=String(T.map_url||"").trim(),m=/src\s*=\s*"([^"]+)"/.exec(v),url=(m?m[1]:v).replace(/&amp;/g,"&");
   if(!/^https:\/\/www\.google\.com\/maps\/embed\?/.test(url)){box.hidden=true;return}
-  const title=T.map_title||"方位を地図で確かめる";
+  const title=String(T.map_title||"");
   MAPY={good,bad};MAPM={good:[],bad:[],mm:""};
   box.innerHTML=`<h3></h3><div class="mapbox"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><svg viewBox="0 0 100 100" aria-hidden="true"></svg></div><p class="cap pl"></p>`;
-  box.querySelector("h3").textContent=title;
+  const h3=box.querySelector("h3");h3.textContent=title;h3.hidden=!title;
   const fr=box.querySelector("iframe");fr.title=title;fr.src=url;
   box.hidden=false;refreshMap();
 }
 function setMapMonth(good,bad,mm){MAPM={good,bad,mm};refreshMap()}
 // 吉方位の作用：方徳 → 方災 の順に続けて表示（セル内の改行はそのまま反映）
 function goodText(g){
-  const parts=[["lbl_hotoku","【方徳】",g.toku],["lbl_hosai","【方災】",g.sai]].filter(x=>x[2]).map(x=>(T[x[0]]||x[1])+"\n"+esc(x[2]));
+  const parts=[["lbl_hotoku",g.toku],["lbl_hosai",g.sai]].filter(x=>x[1]).map(x=>T[x[0]]+"\n"+esc(x[1]));
   return `<span class="pl">${parts.join("\n\n")}</span>`;
 }
 function mLabel(k){return k===11?"翌1":String(((k+1)%12)+1)} // 節入りの月は2月〜翌1月。最終月は「翌1月」と表示する
