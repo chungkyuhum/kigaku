@@ -59,16 +59,16 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .res h2{font-size:24px;margin:0 0 4px}
 h2.sect{text-align:center;font-size:22px;margin:0 0 12px}
 #ch{margin-top:24px}
-details.sec{margin-top:24px}
-details.sec[hidden]{display:none}
-#s2{margin-top:34px}
-details.sec>summary{display:flex;align-items:center;justify-content:center;gap:12px;min-height:44px;margin:0 0 12px;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
-details.sec>summary::-webkit-details-marker{display:none}
-details.sec>summary h2.sect{margin:0}
-details.sec>summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--sub);border-bottom:2px solid var(--sub);transform:translateY(-3px) rotate(45deg);transition:transform .15s}
-details.sec[open]>summary::after{transform:translateY(3px) rotate(-135deg)}
-details.sec>summary:focus-visible{outline:2px solid var(--sub);outline-offset:2px;border-radius:6px}
-#r1d{margin-top:0}
+#hero{margin-top:24px}
+.res h2.sect.dirh{margin:34px 0 12px}
+details.fold>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;margin:-8px 0;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+details.fold[open]>summary{margin-bottom:0}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary h3{margin:0}
+details.fold>summary::after{content:"";flex:none;width:8px;height:8px;border-right:2px solid var(--sub);border-bottom:2px solid var(--sub);transform:translateY(-3px) rotate(45deg);transition:transform .15s}
+details.fold[open]>summary::after{transform:translateY(2px) rotate(-135deg)}
+details.fold>summary:focus-visible{outline:2px solid var(--sub);outline-offset:2px;border-radius:6px}
+details.fold>summary+h4{margin-top:0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
 .card h3{margin:0 0 4px;font-size:16px}
 .card p{margin:0}.pl{white-space:pre-line}
@@ -148,15 +148,8 @@ details.sec>summary:focus-visible{outline:2px solid var(--sub);outline-offset:2p
   </fieldset>
   <p class="priv" data-t="privacy"></p>
   <button class="go" id="b1" data-t="btn_fortune"></button>
-  <details class="sec" id="s1" open>
-    <summary><h2 class="sect" data-t="res_title"></h2></summary>
-    <div id="hero"></div>
-    <div class="res" id="r1" aria-live="polite"></div>
-  </details>
-  <details class="sec" id="s2" hidden>
-    <summary><h2 class="sect" data-t="res_title_dir"></h2></summary>
-    <div class="res" id="r1d"></div>
-  </details>
+  <div id="hero"></div>
+  <div class="res" id="r1" aria-live="polite"></div>
 </section>
 
 <section id="p2" role="tabpanel" aria-labelledby="t2" hidden>
@@ -213,7 +206,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -261,11 +254,12 @@ function setsuiNote(y,m,d,who){
   const tm=termTime(y,m),when=`${m}月${d}日`+(tm?` ${tm.h}時${tm.mi}分`:"");
   return `<div class="card notice"><p>${tx(m===2?"notice_risshun":"notice_setsu",{who,year:y,setsu:SETSU[m-1],when})}</p></div>`;
 }
+// 見出しを押して開閉するカード。k＝カードの識別名、open＝初期状態
+const fold=(k,title,body,open)=>`<details class="card fold" data-k="${k}"${open?" open":""}><summary><h3>${title}</h3></summary>${body}</details>`;
 function fortune(){
   const v=$("d1").value,out=$("r1");
   if(!C)return;
-  const s1=$("s1"),s2=$("s2"),outd=$("r1d");
-  if(!v){out.innerHTML=`<p class="err">${tx("err_birth")}</p>`;s2.hidden=true;outd.innerHTML="";return}
+  if(!v){out.innerHTML=`<p class="err">${tx("err_birth")}</p>`;return}
   const nm=$("n1").value.trim().slice(0,20);
   const [y,m,d]=v.split("-").map(Number);
   const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
@@ -276,26 +270,23 @@ function fortune(){
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&isGoodEl(honmeiInfo.el,ST(pl[p]).el));
   const ytypes={},addT=(p,n)=>{if(p&&p!=="中")(ytypes[p]=ytypes[p]||[]).push(n)};addT(five,"五黄殺");addT(anken,"暗剣殺");addT(honSat,"本命殺");addT(honTeki,"本命的殺");addT(getSat,"月命殺");addT(getTeki,"月命的殺");addT(saiha,"歳破");
   const yg=ORD_DIR.filter(p=>good.includes(p)).map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join(""),yb=ORD_DIR.filter(p=>ytypes[p]).flatMap(p=>ytypes[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
-  const yearDirs=DIRS.errors.length?"":`<div class="card"><h3>${tx("h_good")}</h3>${yg?`<ul class="dl">${yg}</ul>`:`<p>${tx("good_none")}</p>`}</div>
-  <div class="card"><h3>${tx("h_bad")}</h3>${yb?`<ul class="dl">${yb}</ul>`:`<p>${tx("bad_none")}</p>`}</div>`;
-  const cats=C.categories.map(c=>`<div class="card"><h3>${tx("h_cat",{name:c.name,year:BY})}</h3><p>${esc(c.text[pos])}</p></div>`).join("");
+  const yearDirs=DIRS.errors.length?"":fold("ygood",tx("h_good"),yg?`<ul class="dl">${yg}</ul>`:`<p>${tx("good_none")}</p>`,false)+fold("ybad",tx("h_bad"),yb?`<ul class="dl">${yb}</ul>`:`<p>${tx("bad_none")}</p>`,false);
+  const fortuneCard=fold("fortune",tx("h_fortune_all",{year:BY}),`<h4>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h4><p>${f.s}</p>`+C.categories.map(c=>`<h4>${tx("h_cat",{name:c.name,year:BY})}</h4><p>${esc(c.text[pos])}</p>`).join(""),true);
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
-  const bodyCard=(honmeiInfo.body||honmeiInfo.care)?`<div class="card"><h3>${tx("h_body")}</h3>${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p></div>`:"";
-  $("hero").innerHTML=board(pl,honmeiStar,ytypes,good)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
+  const bodyCard=(honmeiInfo.body||honmeiInfo.care)?fold("body",tx("h_body"),`${honmeiInfo.body?`<p><b>${tx("lbl_body")}</b>${esc(honmeiInfo.body)}</p>`:""}${honmeiInfo.care?`<p><b>${tx("lbl_care")}</b>${esc(honmeiInfo.care)}</p>`:""}<p class="small">${tx("body_note")}</p>`,true):"";
+  $("hero").innerHTML=`<h2 class="sect">${tx("res_title")}</h2>`+board(pl,honmeiStar,ytypes,good)+`<p class="cap">${tx("cap_board_me",{year:BY})}</p>`;
   out.innerHTML=`  ${setsuiNote(y,m,d,t("who_input"))}
-  <div class="card"><h3>${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span></h3><p class="pl">${honmeiInfo.text}</p></div>
+  ${fold("honmei",`${tx("lbl_honmei")}<span data-e="${honmeiInfo.el}">${honmeiInfo.name}</span>`,`<p class="pl">${honmeiInfo.text}</p>`,true)}
   ${bodyCard}
-  <div class="card"><h3>${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span></h3><p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p class="pl">${getsumeiInfo.text}</p></div>
-  <div class="card"><h3>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h3><p>${f.s}</p></div>
-  ${cats}
-  <div class="card"><h3>${tx("h_months",{year:BY})}</h3><ul class="yr">${yr}</ul>
-  <p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p></div>`;
-  outd.innerHTML=`  <div id="dirboard"></div>
+  ${fold("getsumei",`${tx("lbl_getsumei")}<span data-e="${getsumeiInfo.el}">${getsumeiInfo.name}</span>`,`<p style="font-size:14px;color:var(--sub);margin:0 0 6px">${tx("getsumei_note")}</p><p class="pl">${getsumeiInfo.text}</p>`,true)}
+  ${fortuneCard}
+  ${fold("months",tx("h_months",{year:BY}),`<ul class="yr">${yr}</ul><p style="font-size:13px;color:var(--sub);margin-top:6px">${tx("months_note")}</p>`,true)}
+  <h2 class="sect dirh">${tx("res_title_dir")}</h2>
+  <div id="dirboard"></div>
   <div class="mnav" id="mnav" hidden><span class="mt" id="mtxt" aria-live="polite"></span><span class="mb"><button type="button" id="mprev" aria-label="${esc(T.btn_mprev)}">◀</button><button type="button" id="mnext" aria-label="${esc(T.btn_mnext)}">▶</button></span></div>
   <div id="mapbox" class="mapwrap" hidden></div>
   ${yearDirs}
   <div id="dirbox"></div>`;
-  s1.open=true;s2.open=false;s2.hidden=false;
   drawMap(good,bad);
   MS=getsumeiStar;
   initDirs(honmeiStar);
@@ -415,6 +406,8 @@ function mLabel(k){return k===11?"翌1":String(((k+1)%12)+1)} // 節入りの月
 function renderDirs(n,k){
   const box=$("dirbox"),bd=$("dirboard"),nav=$("mnav");
   if(DIRS.errors.length){if(nav)nav.hidden=true;bd.innerHTML="";box.innerHTML=`<div class="card">${DIRS.errors.map(x=>`<p class="err">${esc(x)}</p>`).join("")}</div>`;return}
+  const prev={};box.querySelectorAll("details[data-k]").forEach(d=>{prev[d.dataset.k]=d.open}); // 月を変えても開閉の状態を保つ（初期は閉じる）
+  const op=key=>key in prev?prev[key]:false;
   const mm=mLabel(k),{pl,types,good}=monthDirs(n,k);
   if(nav){nav.hidden=false;$("mtxt").textContent=tx("h_dir")+"："+mm+"月";
     $("mprev").setAttribute("aria-disabled",k<=0);$("mnext").setAttribute("aria-disabled",k>=11)}
@@ -424,9 +417,9 @@ function renderDirs(n,k){
     return `<tr${j===k?' class="now"':""}><th scope="row">${mLabel(j)}月</th><td>${g}</td><td>${b}</td></tr>`}).join("");
   setMapMonth(good,Object.keys(types),mm);
   bd.innerHTML=board(pl,n,types,good)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>`;
-  box.innerHTML=`<div class="card"><h3>${tx("h_dir_good",{month:mm})}</h3>${gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`}</div>
-  <div class="card"><h3>${tx("h_dir_bad",{month:mm})}</h3>${bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`}</div>
-  <div class="card"><h3>${tx("h_dir_all")}</h3><div class="tw"><table class="dtab"><thead><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col" class="g">${tx("dir_lbl_good")}</th><th scope="col" class="b">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p></div>`;
+  box.innerHTML=fold("mgood",tx("h_dir_good",{month:mm}),gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`,op("mgood"))
+  +fold("mbad",tx("h_dir_bad",{month:mm}),bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`,op("mbad"))
+  +fold("mall",tx("h_dir_all"),`<div class="tw"><table class="dtab"><thead><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col" class="g">${tx("dir_lbl_good")}</th><th scope="col" class="b">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p>`,op("mall"));
 }
 let DK=0; // いま選んでいる月（0＝2月 … 11＝翌1月）
 function initDirs(n){
@@ -562,7 +555,7 @@ fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx �
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;DIRS=C.dirs;initActions();
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
-  $("hero").innerHTML=board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
+  $("hero").innerHTML=`<h2 class="sect">${tx("res_title")}</h2>`+board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
 }).catch(e=>{$("hero").innerHTML='<div class="card"><h3 class="err">データを読み込めません</h3>'+(Array.isArray(e)?e:["content.xlsx を読み込めませんでした。Webサーバー経由で開いているか確認してください"]).map(x=>`<p class="err">${x}</p>`).join("")+"</div>"});
 </script>
 </body>
