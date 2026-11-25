@@ -124,10 +124,10 @@ details.fold>summary+h4{margin-top:0}
 .actnote{margin:6px 0;font-size:14px}.actnote .mk{display:inline-block;width:1.8em;text-align:center}
 .small{font-size:13px;color:var(--sub);margin:8px 0 0}.card h4{margin:16px 0 4px;font-size:15px}
 .dl{list-style:none;margin:0;padding:0}.dl li{padding:8px 0;border-bottom:1px solid var(--line)}.dl li:last-child{border-bottom:0}
-.tw{overflow-x:auto}.dtab{width:100%;border-collapse:collapse;margin-top:6px}.dtab th,.dtab td{padding:7px 4px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}.dtab tbody th{font-weight:500;white-space:nowrap;font-size:14px;line-height:1.7}
-.dtab col.cm{width:21%}.dtab col.cg{width:29%}.dtab col.cb{width:50%}
+.tw{overflow-x:auto}.dtab{width:100%;border-collapse:collapse;margin-top:6px}.dtab th,.dtab td{padding:7px 4px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}.dtab tbody th{font-weight:500;white-space:nowrap;font-size:14px;line-height:1.7;text-align:right;padding:7px 8px 7px 0}.dtab td{padding-left:0}
+.dtab col.cm{width:1%}
 .chips{display:flex;flex-wrap:wrap;gap:3px}
-.chip{font-size:13px;line-height:1.5;padding:1px 4px;border-radius:5px;white-space:nowrap}
+.chip{position:relative;font-size:13px;line-height:1.5;padding:1px 4px;border-radius:5px;white-space:nowrap}
 .chip.g{background:var(--good-bg);color:var(--wood)}.chip.b{background:var(--bad-bg);color:var(--fire)}
 .dtab .none{color:var(--sub);line-height:1.7}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.dtab tr.now{background:var(--accent-bg)}
@@ -212,7 +212,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same", "act_month"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same", "act_month"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -426,14 +426,14 @@ function renderDirs(n,k){
     $("mprev").setAttribute("aria-disabled",k<=0);$("mnext").setAttribute("aria-disabled",k>=11)}
   const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join("");
   const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
-  const chips=(ps,c)=>ps.length?`<div class="chips">${ps.map(p=>`<span class="chip ${c}">${DIR[p]}</span>`).join("")}</div>`:`<span class="none">－</span>`;
-  const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j);
-    return `<tr${j===k?' class="now"':""}><th scope="row">${mLabel(j)}月</th><td>${chips(r.good,"g")}</td><td>${chips(ORD_DIR.filter(p=>r.types[p]),"b")}</td></tr>`}).join("");
+  const chip=(p,c,lb)=>`<span class="chip ${c}"><span class="sr">${lb}</span>${DIR[p]}</span>`; // 色だけに頼らないよう、読み上げ用に「吉」「凶」を添える
+  const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),cs=r.good.map(p=>chip(p,"g",tx("dir_lbl_good"))).concat(ORD_DIR.filter(p=>r.types[p]).map(p=>chip(p,"b",tx("dir_lbl_bad"))));
+    return `<tr${j===k?' class="now"':""}><th scope="row">${mLabel(j)}月</th><td>${cs.length?`<div class="chips">${cs.join("")}</div>`:`<span class="none">－</span>`}</td></tr>`}).join("");
   setMapMonth(good,Object.keys(types),mm);
   bd.innerHTML=board(pl,n,types,good)+`<p class="cap">${tx("dir_board_cap",{month:mm})}</p>`;
   box.innerHTML=fold("mgood",tx("h_dir_good",{month:mm}),gl?`<ul class="dl">${gl}</ul>`:`<p>${tx("dir_good_none")}</p>`,op("mgood"))
   +fold("mbad",tx("h_dir_bad",{month:mm}),bl?`<ul class="dl">${bl}</ul>`:`<p>${tx("dir_bad_none")}</p>`,op("mbad"))
-  +fold("mall",tx("h_dir_all"),`<div class="tw"><table class="dtab"><colgroup><col class="cm"><col class="cg"><col class="cb"></colgroup><thead class="sr"><tr><th scope="col">${tx("lbl_dirmonth")}</th><th scope="col">${tx("dir_lbl_good")}</th><th scope="col">${tx("dir_lbl_bad")}</th></tr></thead><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p>`,op("mall"));
+  +fold("mall",tx("h_dir_all"),`<div class="tw"><table class="dtab"><colgroup><col class="cm"><col></colgroup><tbody>${all}</tbody></table></div><p class="small">${tx("dir_all_note")}</p>`,op("mall"));
 }
 let DK=0; // いま選んでいる月（0＝2月 … 11＝翌1月）
 function initDirs(n){
