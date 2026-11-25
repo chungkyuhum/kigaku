@@ -83,11 +83,12 @@ details.fold>summary+h4{margin-top:0}
 .rg .el{fill:currentColor;font-family:"Zen Old Mincho",serif;font-weight:700;font-size:26px;text-anchor:middle;dominant-baseline:central}
 .rg .st{fill:var(--ink);font-size:10.5px;text-anchor:middle}.rg .tag{fill:var(--accent);font-size:10.5px}
 .rg .ar{fill:none;stroke-width:2.2;stroke-linecap:round}.rg .ar.g{stroke:var(--wood)}.rg .ar.c{stroke:var(--fire)}
-.rg .ar.dim{opacity:.4}.rg .ar.on{stroke-width:3.6}.rg .mg{fill:var(--wood)}.rg .mc{fill:var(--fire)}
+.rg .ar.dim{opacity:.4}.rg .ar.mid{opacity:.7}.rg .ar.on{stroke-width:3.6}.rg .mg{fill:var(--wood)}.rg .mc{fill:var(--fire)}
 .rg .lb{font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round}
 .rg .lb.g{fill:var(--wood)}.rg .lb.c{fill:var(--fire)}
-.rhead .rl{display:block;font-size:20px;line-height:1.7}
-.rgcap{text-align:center;font-weight:500;margin:4px 0 14px}
+.relhead{font-size:18px;font-weight:700;line-height:1.7;margin:0 0 4px}
+.relhead .sep{margin:0 .5em;color:var(--sub);font-weight:400}
+.rgcap{text-align:center;font-weight:500;margin:4px 0 14px;text-wrap:balance}
 .stars{color:var(--accent);letter-spacing:.1em}
 .score{font-family:"Zen Old Mincho",serif;font-size:44px;font-weight:700;line-height:1}
 .err{color:var(--fire)}
@@ -168,6 +169,7 @@ details.fold>summary+h4{margin-top:0}
   <p class="priv" data-t="privacy"></p>
   <button class="go" id="b2" data-t="btn_compat"></button>
   <h2 class="sect" id="ch" data-t="res_title_compat"></h2>
+  <div id="rel"></div>
   <div class="res" id="r2" aria-live="polite"></div>
 </section>
 
@@ -206,7 +208,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "lbl_dirmonth", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "lbl_year", "lbl_month", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -295,28 +297,30 @@ function honmeiOf(v){const [y,m,d]=v.split("-").map(Number);return calcStars(y,m
 // 五行の関係図：二人の星を強調し、二人をつなぐ矢印（生む＝緑／剋す＝赤）だけを濃く描く。年盤と同じ配色
 // 五行は正五角形の頂点に円で配置。矢印は（生む・剋すとも）直線で、相手の円の「中心」に向かって入る。
 function relationFig(youStar,partnerStar,youName,partnerName){
+  const plain=youStar==null; // 鑑定前：強調なしの五行図
   const EL5=["木","火","土","金","水"],P={},CX=200,CY=186,R=128,NR=39;
   EL5.forEach((e,i)=>{const a=i*72*Math.PI/180;P[e]=[CX+R*Math.sin(a),CY-R*Math.cos(a)]});
-  const ey=ST(youStar),ep=ST(partnerStar),ex=ey.el,eq=ep.el,f=v=>v.toFixed(1);
+  const ey=plain?null:ST(youStar),ep=plain?null:ST(partnerStar),ex=plain?null:ey.el,eq=plain?null:ep.el,f=v=>v.toFixed(1);
   const cut=(n,m)=>{n=String(n);return n.length>m?n.slice(0,m)+"…":n};
   const nameY=youName?cut(youName,4):t("legend_you"),nameP=partnerName?cut(partnerName,4):t("legend_partner");
-  const capY=youName?youName+"さん":t("legend_you"),capP=partnerName?partnerName+"さん":t("legend_partner");
-  const arrow=(a,b,kind,on)=>{
+  const capY=youName?t("name_san",{name:youName}):t("legend_you"),capP=partnerName?t("name_san",{name:partnerName}):t("legend_partner");
+  const arrow=(a,b,kind,mode)=>{
     const [ax,ay]=P[a],[bx,by]=P[b],L=Math.hypot(bx-ax,by-ay),ux=(bx-ax)/L,uy=(by-ay)/L;
     // 生む・剋す どちらも、中心から中心への直線。円の縁から縁までを描き、矢印の先は相手の円の中心に向かう
     const sx=ax+ux*(NR+4),sy=ay+uy*(NR+4),tx=bx-ux*(NR+6),ty=by-uy*(NR+6);
     const d=`M${f(sx)},${f(sy)} L${f(tx)},${f(ty)}`,lx=(sx+tx)/2,ly=(sy+ty)/2;
-    return {svg:`<path class="ar ${kind}${on?" on":" dim"}" d="${d}" marker-end="url(#rg${kind==="g"?"g":"c"})"/>`,lx:f(lx),ly:f(ly)};
+    return {svg:`<path class="ar ${kind} ${mode}" d="${d}" marker-end="url(#rg${kind==="g"?"g":"c"})"/>`,lx:f(lx),ly:f(ly)};
   };
   let rel=null;
-  if(ex!==eq){
+  if(!plain&&ex!==eq){
     if(GEN[ex]===eq)rel={a:ex,b:eq,k:"g",from:capY,to:capP};else if(GEN[eq]===ex)rel={a:eq,b:ex,k:"g",from:capP,to:capY};
     else if(CTL[ex]===eq)rel={a:ex,b:eq,k:"c",from:capY,to:capP};else rel={a:eq,b:ex,k:"c",from:capP,to:capY};
   }
   let dim="",hi="",lab="";
-  EL5.forEach((e,i)=>{dim+=arrow(e,EL5[(i+1)%5],"g",false).svg});
-  EL5.forEach((e,i)=>{dim+=arrow(e,EL5[(i+2)%5],"c",false).svg});
-  if(rel){const A=arrow(rel.a,rel.b,rel.k,true);hi=A.svg;lab=`<text class="lb ${rel.k}" x="${A.lx}" y="${A.ly}">${rel.k==="g"?"生む":"剋す"}</text>`}
+  const base=plain?"mid":"dim";
+  EL5.forEach((e,i)=>{dim+=arrow(e,EL5[(i+1)%5],"g",base).svg});
+  EL5.forEach((e,i)=>{dim+=arrow(e,EL5[(i+2)%5],"c",base).svg});
+  if(rel){const A=arrow(rel.a,rel.b,rel.k,"on");hi=A.svg;lab=`<text class="lb ${rel.k}" x="${A.lx}" y="${A.ly}">${esc(t(rel.k==="g"?"rel_lbl_g":"rel_lbl_c"))}</text>`}
   const node=e=>{
     const [x,y]=P[e],people=[];if(e===ex)people.push(nameY);if(e===eq)people.push(nameP);
     const on=people.length>0;let o=`<circle class="nd${on?" on":""}" cx="${f(x)}" cy="${f(y)}" r="${NR}"/>`;
@@ -325,26 +329,26 @@ function relationFig(youStar,partnerStar,youName,partnerName){
     else if(people.length===2)o+=`<text class="tag" x="${f(x)}" y="${f(y-NR+18)}" text-anchor="middle">${esc(people[0])}</text><text class="tag" x="${f(x)}" y="${f(y+NR-10)}" text-anchor="middle">${esc(people[1])}</text>`;
     return o;
   };
-  const cap=!rel?`${capY}・${capP}：同じ五行（比和）`:`${rel.from}が${rel.to}を${rel.k==="g"?"生む":"剋す"}`;
+  const cap=plain?t("rel_cap"):!rel?t("rel_cap_same",{you:capY,partner:capP}):t(rel.k==="g"?"rel_cap_g":"rel_cap_c",{from:rel.from,to:rel.to});
   return `<svg class="rg" viewBox="0 0 400 340" role="img" aria-label="${esc(cap)}"><defs><marker id="rgg" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mg" d="M0,2.5 L10,5 L0,7.5 z"/></marker><marker id="rgc" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mc" d="M0,2.5 L10,5 L0,7.5 z"/></marker></defs>${dim}${EL5.map(node).join("")}${hi}${lab}</svg><p class="rgcap">${esc(cap)}</p>`;
 }
+const relPlain=()=>`<div class="relhead">${tx("rel_title")}</div>`+relationFig(null,null);
 function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
   if(!C)return;
   if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
   const youName=$("n2").value.trim().slice(0,20),partnerName=$("n3").value.trim().slice(0,20);
   const youStar=honmeiOf(a),partnerStar=honmeiOf(b),ex=ST(youStar).el,ey=ST(partnerStar).el;
-  const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",dY=youName?esc(youName)+"さん":t("legend_you"),dP=partnerName?esc(partnerName)+"さん":t("legend_partner");
+  const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",dY=youName?esc(t("name_san",{name:youName})):t("legend_you"),dP=partnerName?esc(t("name_san",{name:partnerName})):t("legend_partner");
   let r=C.fixed.relations[k];
   if(C.fixed.pairs){const p=C.fixed.pairs[Math.min(youStar,partnerStar)*10+Math.max(youStar,partnerStar)],youIsA=p.a===youStar,nA=youIsA?dY:dP,nB=youIsA?dP:dY,fill=x=>x.replace(/\{A\}/g,nA).replace(/\{B\}/g,nB);r={score:p.score,label:fill(p.label),text:fill(p.text)}}
-  const who=(label,nm,st)=>`<span class="rl">${nm?esc(nm)+"さん":label}：<span data-e="${st.el}">${st.name}の${st.el}</span></span>`;
-  const title=who(t("legend_you"),youName,ST(youStar))+who(t("legend_partner"),partnerName,ST(partnerStar));
+  const who=(label,nm,st)=>tx("rel_who",{who:"\uE000",star:"\uE001"}).replace("\uE000",esc(nm?t("name_san",{name:nm}):label)).replace("\uE001",`<span data-e="${st.el}">${st.name}</span>`);
+  const head=`<div class="relhead">${who(t("legend_you"),youName,ST(youStar))}<span class="sep">${tx("rel_sep")}</span>${who(t("legend_partner"),partnerName,ST(partnerStar))}</div>`;
   const hYou=youName?tx("h_you_named",{name:youName,star:ST(youStar).name}):tx("h_you",{star:ST(youStar).name});
   const hPartner=partnerName?tx("h_partner_named",{name:partnerName,star:ST(partnerStar).name}):tx("h_partner",{star:ST(partnerStar).name});
   const [ya,ma,da]=a.split("-").map(Number),[yb,mb,db]=b.split("-").map(Number);
-  out.innerHTML=`<h2 class="rhead">${title}</h2>
-  ${setsuiNote(ya,ma,da,t("legend_you"))}${setsuiNote(yb,mb,db,t("legend_partner"))}
-  ${relationFig(youStar,partnerStar,youName,partnerName)}
+  $("rel").innerHTML=head+relationFig(youStar,partnerStar,youName,partnerName);
+  out.innerHTML=`${setsuiNote(ya,ma,da,t("legend_you"))}${setsuiNote(yb,mb,db,t("legend_partner"))}
   <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p class="pl">${r.text}</p></div>
   ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
   <div class="card"><h3>${hYou}</h3><p class="pl">${ST(youStar).text}</p></div>
@@ -555,6 +559,7 @@ fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx �
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;DIRS=C.dirs;initActions();
   const t=new Date(),o=info(t.getFullYear(),t.getMonth()+1,t.getDate());BY=o.by;TI=o.i;
   if(C.yearly.year!==BY)console.warn("content.xlsx は "+C.yearly.year+" 年版です。"+BY+" 年用に更新してください。");
+  $("rel").innerHTML=relPlain();
   $("hero").innerHTML=`<h2 class="sect">${tx("res_title")}</h2>`+board(place(center(BY)),0)+`<p class="cap">${tx("cap_board",{year:BY})}</p>`;
 }).catch(e=>{$("hero").innerHTML='<div class="card"><h3 class="err">データを読み込めません</h3>'+(Array.isArray(e)?e:["content.xlsx を読み込めませんでした。Webサーバー経由で開いているか確認してください"]).map(x=>`<p class="err">${x}</p>`).join("")+"</div>"});
 </script>
