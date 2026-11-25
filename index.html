@@ -113,6 +113,7 @@ details.fold>summary+h4{margin-top:0}
 .addr a{color:var(--ink)}
 .yr{list-style:none;margin:0;padding:0}.yr li{display:flex;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line)}.yr li.now{background:var(--accent-bg);font-weight:500}.yr .mo{width:3em}.yr .pl{width:2em;color:var(--sub)}
 .priv{font-size:13px;color:var(--sub);margin:0 0 12px}
+.priv.err{color:var(--fire)}
 .card.notice{border-left:4px solid var(--accent)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:14px 0}
 .cal .wk{text-align:center;font-size:13px;color:var(--sub)}
@@ -147,7 +148,7 @@ details.fold>summary+h4{margin-top:0}
       <label><span data-t="lbl_birth"></span><input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
     </div>
   </fieldset>
-  <p class="priv" data-t="privacy"></p>
+  <p class="priv" id="pv1" data-t="privacy" aria-live="polite"></p>
   <button class="go" id="b1" data-t="btn_fortune"></button>
   <div id="hero"></div>
   <div class="res" id="r1" aria-live="polite"></div>
@@ -166,7 +167,7 @@ details.fold>summary+h4{margin-top:0}
       <label><span data-t="lbl_birth"></span><input type="date" id="d3" min="1901-01-01" max="2099-12-31"></label>
     </div>
   </fieldset>
-  <p class="priv" data-t="privacy"></p>
+  <p class="priv" id="pv2" data-t="privacy" aria-live="polite"></p>
   <button class="go" id="b2" data-t="btn_compat"></button>
   <h2 class="sect" id="ch" data-t="res_title_compat"></h2>
   <div id="rel"></div>
@@ -258,10 +259,14 @@ function setsuiNote(y,m,d,who){
 }
 // 見出しを押して開閉するカード。k＝カードの識別名、open＝初期状態
 const fold=(k,title,body,open)=>`<details class="card fold" data-k="${k}"${open?" open":""}><summary><h3>${title}</h3></summary>${body}</details>`;
+// 入力なしのエラーは、「入力した名前や生年月日は…」の行に上書きして赤で表示。入力し直すか鑑定に成功すると元の文に戻る
+const pvMsg=(id,key)=>{const p=$(id);p.textContent=t(key);p.classList.add("err")};
+const pvReset=id=>{const p=$(id);p.textContent=t("privacy");p.classList.remove("err")};
 function fortune(){
   const v=$("d1").value,out=$("r1");
   if(!C)return;
-  if(!v){out.innerHTML=`<p class="err">${tx("err_birth")}</p>`;return}
+  if(!v){pvMsg("pv1","err_birth");out.innerHTML="";return}
+  pvReset("pv1");
   const nm=$("n1").value.trim().slice(0,20);
   const [y,m,d]=v.split("-").map(Number);
   const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
@@ -336,7 +341,8 @@ const relPlain=()=>`<div class="relhead">${tx("rel_title")}</div>`+relationFig(n
 function compat(){
   const a=$("d2").value,b=$("d3").value,out=$("r2");
   if(!C)return;
-  if(!a||!b){out.innerHTML=`<p class="err">${tx("err_birth2")}</p>`;return}
+  if(!a||!b){pvMsg("pv2","err_birth2");out.innerHTML="";return}
+  pvReset("pv2");
   const youName=$("n2").value.trim().slice(0,20),partnerName=$("n3").value.trim().slice(0,20);
   const youStar=honmeiOf(a),partnerStar=honmeiOf(b),ex=ST(youStar).el,ey=ST(partnerStar).el;
   const k=ex===ey?"same":GEN[ex]===ey?"give":GEN[ey]===ex?"recv":CTL[ex]===ey?"win":"lose",dY=youName?esc(t("name_san",{name:youName})):t("legend_you"),dP=partnerName?esc(t("name_san",{name:partnerName})):t("legend_partner");
@@ -470,6 +476,7 @@ function applyTexts(){
   else $("contact").hidden=true;
 }
 $("b1").onclick=fortune;$("b2").onclick=compat;
+$("d1").addEventListener("input",()=>pvReset("pv1"));["d2","d3"].forEach(i=>$(i).addEventListener("input",()=>pvReset("pv2")));
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".tabs button").forEach(t=>{const on=t===b;t.setAttribute("aria-selected",on);$(t.getAttribute("aria-controls")).hidden=!on});
 });
