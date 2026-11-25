@@ -90,7 +90,6 @@ details.fold>summary+h4{margin-top:0}
 .relhead .sep{margin:0 .5em;color:var(--sub);font-weight:400}
 .rgcap{text-align:center;font-weight:500;margin:4px 0 14px;text-wrap:balance}
 .stars{color:var(--accent);letter-spacing:.1em}
-.score{font-family:"Zen Old Mincho",serif;font-size:44px;font-weight:700;line-height:1}
 .err{color:var(--fire)}
 .note{font-size:13px;color:var(--sub);margin-top:30px;border-top:1px solid var(--line);padding-top:14px}
 .dir{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:1px 12px;margin:2px 4px 2px 0;font-size:14px}
@@ -212,7 +211,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "pt", "gokou_h", "gokou_text", "h_you", "h_partner", "res_compat_named", "h_you_named", "h_partner_named", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same", "act_month"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "gokou_h", "gokou_text", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same", "act_month", "h_pair"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -353,15 +352,12 @@ function compat(){
   if(C.fixed.pairs){const p=C.fixed.pairs[Math.min(youStar,partnerStar)*10+Math.max(youStar,partnerStar)],youIsA=p.a===youStar,nA=youIsA?dY:dP,nB=youIsA?dP:dY,fill=x=>x.replace(/\{A\}/g,nA).replace(/\{B\}/g,nB);r={score:p.score,label:fill(p.label),text:fill(p.text)}}
   const who=(label,nm,st)=>tx("rel_who",{who:"\uE000",star:"\uE001"}).replace("\uE000",esc(nm?t("name_san",{name:nm}):label)).replace("\uE001",`<span data-e="${st.el}">${st.name}</span>`);
   const head=`<div class="relhead">${who(t("legend_you"),youName,ST(youStar))}<span class="sep">${tx("rel_sep")}</span>${who(t("legend_partner"),partnerName,ST(partnerStar))}</div>`;
-  const hYou=youName?tx("h_you_named",{name:youName,star:ST(youStar).name}):tx("h_you",{star:ST(youStar).name});
-  const hPartner=partnerName?tx("h_partner_named",{name:partnerName,star:ST(partnerStar).name}):tx("h_partner",{star:ST(partnerStar).name});
   const [ya,ma,da]=a.split("-").map(Number),[yb,mb,db]=b.split("-").map(Number);
   $("rel").innerHTML=head+relationFig(youStar,partnerStar,youName,partnerName);
   out.innerHTML=`${setsuiNote(ya,ma,da,t("legend_you"))}${setsuiNote(yb,mb,db,t("legend_partner"))}
-  <div class="card"><div class="score">${r.score}<span style="font-size:18px"> ${tx("pt")}</span></div><h3 style="margin-top:8px">${r.label}</h3><p class="pl">${r.text}</p></div>
-  ${(youStar===5||partnerStar===5)?`<div class="card"><h3>${tx("gokou_h")}</h3><p>${tx("gokou_text")}</p></div>`:""}
-  <div class="card"><h3>${hYou}</h3><p class="pl">${ST(youStar).text}</p></div>
-  <div class="card"><h3>${hPartner}</h3><p class="pl">${ST(partnerStar).text}</p></div>
+  ${fold("pair",tx("h_pair",{score:r.score}),`<h4>${r.label}</h4><p class="pl">${r.text}</p>${(youStar===5||partnerStar===5)?`<h4>${tx("gokou_h")}</h4><p>${tx("gokou_text")}</p>`:""}`,true)}
+  ${fold("you",who(t("legend_you"),youName,ST(youStar)),`<p class="pl">${ST(youStar).text}</p>`,true)}
+  ${fold("partner",who(t("legend_partner"),partnerName,ST(partnerStar)),`<p class="pl">${ST(partnerStar).text}</p>`,true)}
   <p style="font-size:14px;color:var(--sub)">${tx("compat_note")}</p>`;
 }
 // 月ごとの方位
