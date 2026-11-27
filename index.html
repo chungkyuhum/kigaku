@@ -47,6 +47,8 @@ fieldset{border:1px solid var(--line);border-radius:8px;background:var(--surface
 legend{font-weight:500;padding:0 6px}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 label{display:flex;flex-direction:column;font-size:14px;color:var(--sub);flex:1;min-width:140px}
+fieldset{min-width:0}.row.r3{flex-wrap:nowrap;align-items:flex-end}.row.r3 label{min-width:0}.row.r3 input,.row.r3 select{min-width:0;width:100%}.row.r3 .cn{flex:1 1 0}.row.r3{gap:8px}.row.r3 label{font-size:13px}.row.r3 .cd{flex:0 0 128px}.row.r3 .cg{flex:0 0 66px}.row.r3 input,.row.r3 select{padding-left:8px;padding-right:8px}
+@media(max-width:339px){.row.r3{flex-wrap:wrap}.row.r3 label,.row.r3 .cn,.row.r3 .cd,.row.r3 .cg{flex:1 1 140px;min-width:140px}}
 input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;margin-top:4px;min-height:44px}
 .go{width:100%;min-height:48px;background:var(--ink);color:var(--bg);border:0;border-radius:8px;font:500 17px "Noto Sans JP",sans-serif;cursor:pointer}
 .mnav{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 8px 8px 16px;margin:12px 0}
@@ -148,9 +150,10 @@ details.fold>summary+h4{margin-top:0}
 
 <section id="p1" role="tabpanel" aria-labelledby="t1">
   <fieldset><legend data-t="legend_you"></legend>
-    <div class="row">
-      <label><span data-t="lbl_name"></span><input type="text" id="n1" maxlength="20" autocomplete="off"></label>
-      <label><span data-t="lbl_birth"></span><input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
+    <div class="row r3">
+      <label class="cn"><span data-t="lbl_name"></span><input type="text" id="n1" maxlength="20" autocomplete="off"></label>
+      <label class="cd"><span data-t="lbl_birth"></span><input type="date" id="d1" min="1901-01-01" max="2099-12-31"></label>
+      <label class="cg"><span data-t="lbl_gender"></span><select id="g1"><option value="" data-t="opt_gender_none"></option><option value="m" data-t="opt_male"></option><option value="f" data-t="opt_female"></option></select></label>
     </div>
   </fieldset>
   <p class="priv" id="pv1" data-t="privacy" aria-live="polite"></p>
@@ -211,7 +214,7 @@ const CT=[[1,6.11,5.4055],[2,4.6295,3.87],[3,6.3826,5.63],[4,5.59,4.81],[5,6.318
 const $=id=>document.getElementById(id);
 const sum=n=>{n=String(n).split("").reduce((a,c)=>a+ +c,0);return n>9?sum(n):n};
 const wrap=n=>{while(n>9)n-=9;while(n<1)n+=9;return n};
-let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "gokou_h", "gokou_text", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same", "act_month", "h_pair"];
+let C,BY,TI,T={},ACT={data:{},errors:[]},DIRS={good:[],bad:{},errors:[]};const KEYS=["title", "h1", "lead", "tab1", "tab2", "legend_you", "legend_partner", "lbl_name", "lbl_birth", "privacy", "btn_fortune", "btn_compat", "disclaimer", "contact_h", "contact_text", "contact_btn", "contact_mail", "contact_subject", "contact_body", "cap_board", "h_body", "lbl_body", "lbl_care", "body_note", "h_dir", "dir_board_cap", "h_dir_good", "dir_good_item", "dir_good_none", "h_dir_bad", "dir_bad_item", "dir_bad_none", "h_dir_all", "dir_lbl_good", "dir_lbl_bad", "dir_all_note", "tab3", "act_nodata", "act_today_good", "act_today_bad", "act_today_tensha", "act_today_none", "act_good_title", "act_good_note", "act_bad_title", "act_bad_note", "act_tensha_title", "act_tensha_note", "act_none_note", "who_input", "notice_setsu", "notice_risshun", "cap_board_me", "err_birth", "res_title", "res_title_dir", "lbl_honmei", "lbl_getsumei", "getsumei_note", "h_year", "h_cat", "h_good", "good_none", "h_bad", "bad_none", "h_months", "months_note", "err_birth2", "and", "gokou_h", "gokou_text", "compat_note", "btn_mprev", "btn_mnext", "lbl_hotoku", "lbl_hosai", "res_title_compat", "h_fortune_all", "rel_title", "rel_cap", "rel_who", "rel_sep", "name_san", "rel_lbl_g", "rel_lbl_c", "rel_cap_g", "rel_cap_c", "rel_cap_same", "act_month", "h_pair", "lbl_gender", "opt_gender_none", "opt_male", "opt_female", "err_gender"];
 function termDay(y,m){
   const o=((C.yearly.setsuiriOverride||{})[y]||{})[m];if(o)return o;
   const tb=((C.yearly.setsuiriTable||{})[y]||{})[m];if(tb)return tb.d;
@@ -271,7 +274,12 @@ function fortune(){
   pvReset("pv1");
   const nm=$("n1").value.trim().slice(0,20);
   const [y,m,d]=v.split("-").map(Number);
-  const {honmei:honmeiStar,getsumei:getsumeiStar}=calcStars(y,m,d),honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
+  const cs=calcStars(y,m,d),honmeiStar=cs.honmei,sex=$("g1").value;let getsumeiStar=cs.getsumei;
+  if(getsumeiStar===honmeiStar){ // 特殊傾斜法：本命星と月命星が同じ星のときは、「月命星の変換」シートの表で月命星を変える
+    const tl=C.tilt[honmeiStar];
+    if(tl.m!==tl.f&&!sex){pvMsg("pv1","err_gender");out.innerHTML="";return} // 男女で月命星が変わる星のときだけ、性別が必要
+    getsumeiStar=sex==="f"?tl.f:tl.m}
+  const honmeiInfo=ST(honmeiStar),getsumeiInfo=ST(getsumeiStar);
   const pl=place(center(BY)),pos=find(pl,honmeiStar),f=C.yearly.palaceYear[pos];
   const five=find(pl,5),anken=five==="中"?null:OPP[five],honSat=pos==="中"?null:pos,honTeki=pos==="中"?null:OPP[pos];
   const mpos=find(pl,getsumeiStar),getSat=mpos==="中"?null:mpos,getTeki=mpos==="中"?null:OPP[mpos]; // 月命殺・月命的殺（月命星が入る方位とその反対側）
@@ -482,7 +490,7 @@ function applyTexts(){
   else $("contact").hidden=true;
 }
 $("b1").onclick=fortune;$("b2").onclick=compat;
-$("d1").addEventListener("input",()=>pvReset("pv1"));["d2","d3"].forEach(i=>$(i).addEventListener("input",()=>pvReset("pv2")));
+$("d1").addEventListener("input",()=>pvReset("pv1"));$("g1").addEventListener("change",()=>pvReset("pv1"));["d2","d3"].forEach(i=>$(i).addEventListener("input",()=>pvReset("pv2")));
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".tabs button").forEach(t=>{const on=t===b;t.setAttribute("aria-selected",on);$(t.getAttribute("aria-controls")).hidden=!on});
 });
@@ -492,12 +500,21 @@ function parse(wb){
   const E=(s,i,m)=>errs.push(`「${s}」シートの${i+2}行目：${m}`),blank=r=>r.every(x=>x==="");
   const yr=g("設定").find(r=>r[0]==="対象年"),year=yr?+yr[1]:NaN;
   if(!(year>=1901&&year<=2099))errs.push("「設定」シートの「対象年」に西暦の数字を入れてください");
-  const stars=[],sr=g("九星");
+  const stars=[],sr=g("九星"),starNo=nm=>stars.findIndex(x=>x.name===nm)+1;
   for(let k=0;k<9;k++){const r=sr[k]||[];
     if(!r[1])E("九星",k,"星の名前が空です");
     if(!"水木火土金".includes(r[2]||"x")||r[2].length!==1)E("九星",k,"五行は 水・木・火・土・金 のどれか1文字にしてください");
     if(!r[3])E("九星",k,"性格説明が空です");
     stars.push({name:r[1],el:r[2],text:String(r[3]).replace(/\r\n?/g,"\n"),body:r[4]||"",care:r[5]||""})}
+  const tilt={};
+  g("月命星の変換").slice(0,9).forEach((r,i)=>{if(blank(r))return; // 表は9行（下の説明文は読まない）
+    const a=starNo(r[0]),b=starNo(r[1]),c=r[2]===""?b:starNo(r[2]);
+    if(!a){E("月命星の変換",i,"A列は、九星シートの星の名前（例：一白水星）にしてください");return}
+    if(!b)E("月命星の変換",i,"B列（新しい月命星）は、九星シートの星の名前（例：九紫火星）にしてください");
+    else if(!c)E("月命星の変換",i,"C列（新しい月命星・女性）は、空にするか、九星シートの星の名前にしてください");
+    else if(tilt[a])E("月命星の変換",i,"同じ本命星が2回あります");
+    else tilt[a]={m:b,f:c}});
+  for(let a=1;a<=9;a++)if(!tilt[a])errs.push(`「月命星の変換」シートに「${stars[a-1]?stars[a-1].name:a}」の行がありません`);
   const py={},pm={};
   g("年運").forEach((r,i)=>{if(blank(r))return;const p=r[0];if(!PAL.includes(p)){E("年運",i,"方位は 中・乾・兌・艮・離・坎・坤・震・巽 のどれかです");return}
     const n=+r[2];if(!(n>=1&&n<=5&&Number.isInteger(n)))E("年運",i,"★の数は1〜5の整数にしてください");
@@ -566,7 +583,7 @@ function parse(wb){
       PAL.forEach(p=>{if(!text[p])errs.push(`「運勢カテゴリ」シートの「${head[c]}」に「${p}」の行がありません`)});
       cats.push({name:head[c],text})}}
   if(errs.length)throw errs;
-  return{dirs:dg,actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel,pairs:pairMode?pairs:null},yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
+  return{dirs:dg,actions:{data:act,errors:aerr},texts:T2,categories:cats,fixed:{stars,relations:rel,pairs:pairMode?pairs:null},tilt:tilt,yearly:{year,setsuiriOverride:ov,setsuiriTable:tbl,palaceYear:py,palaceMonth:pm}};
 }
 fetch("content.xlsx",{cache:"no-cache"}).then(r=>{if(!r.ok)throw["content.xlsx が見つかりません。index.html と同じ場所にアップロードしてください"];return r.arrayBuffer()})
 .then(b=>{C=parse(XLSX.read(b,{type:"array"}));T=C.texts;applyTexts();ACT=C.actions;DIRS=C.dirs;initActions();
