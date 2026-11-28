@@ -248,10 +248,11 @@ function calcStars(y,m,d){
 function place(c){const o={};ORDER.forEach((p,k)=>o[p]=wrap(c+k));return o}
 const find=(pl,s)=>Object.keys(pl).find(p=>pl[p]===s);
 const ST=n=>C.fixed.stars[n-1];
+const BI=n=>{const i=Object.keys(DIRS.bad).indexOf(n);return i<0?99:i}; // 凶方位の種類の順位＝「凶方位の作用」シートの行の順（上ほど悪い）
 const ABBR={五黄殺:"五黄",暗剣殺:"暗剣",本命殺:"本命",本命的殺:"本的",月命殺:"月命",月命的殺:"月的",歳破:"歳破",月破:"月破"};
 function board(pl,me,bad,good){
   return '<div class="board">'+GRID.map(p=>{const s=pl[p],st=ST(s);
-    return `<div class="cell${me===s?" me":""}${bad&&bad[p]?" bad":good&&good.includes(p)?" good":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad[p]?`<span class="x">${bad[p].map(n=>`<span>${ABBR[n]||n}</span>`).join("")}</span>`:good&&good.includes(p)?'<span class="x ok"><span>吉</span></span>':""}</div>`}).join("")+"</div>";
+    return `<div class="cell${me===s?" me":""}${bad&&bad[p]?" bad":good&&good.includes(p)?" good":""}"><span class="p">${p}・${DIR[p]}</span><span class="s" data-e="${st.el}">${st.name.slice(0,2)}</span><span class="e" data-e="${st.el}">${st.el}</span>${bad&&bad[p]?`<span class="x">${bad[p].slice().sort((a,b)=>BI(a)-BI(b)).map(n=>`<span>${ABBR[n]||n}</span>`).join("")}</span>`:good&&good.includes(p)?'<span class="x ok"><span>吉</span></span>':""}</div>`}).join("")+"</div>";
 }
 const esc=s=>String(s).replace(/\r\n?/g,"\n").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const t=(k,o)=>String(T[k]??"").replace(/\{(\w+)\}/g,(m,x)=>o&&x in o?o[x]:m);
@@ -263,6 +264,7 @@ function setsuiNote(y,m,d,who){
   return `<div class="card notice"><p>${tx(m===2?"notice_risshun":"notice_setsu",{who,year:y,setsu:SETSU[m-1],when})}</p></div>`;
 }
 // 見出しを押して開閉するカード。k＝カードの識別名、open＝初期状態
+const badList=types=>ORD_DIR.flatMap(p=>(types[p]||[]).map(tp=>({p,tp}))).sort((a,b)=>BI(a.tp)-BI(b.tp)).map(({p,tp})=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`).join("");
 const fold=(k,title,body,open)=>`<details class="card fold" data-k="${k}"${open?" open":""}><summary><h3>${title}</h3></summary>${body}</details>`;
 // 入力なしのエラーは、「入力した名前や生年月日は…」の行に上書きして赤で表示。入力し直すか鑑定に成功すると元の文に戻る
 const pvMsg=(id,key)=>{const p=$(id);p.textContent=t(key);p.classList.add("err")};
@@ -286,7 +288,7 @@ function fortune(){
   const saiha=yearBreak(BY),bad=[five,anken,honSat,honTeki,getSat,getTeki,saiha].filter(x=>x&&x!=="中");
   const good=Object.keys(pl).filter(p=>p!=="中"&&!bad.includes(p)&&pl[p]!==5&&isGoodEl(honmeiInfo.el,ST(pl[p]).el));
   const ytypes={},addT=(p,n)=>{if(p&&p!=="中")(ytypes[p]=ytypes[p]||[]).push(n)};addT(five,"五黄殺");addT(anken,"暗剣殺");addT(honSat,"本命殺");addT(honTeki,"本命的殺");addT(getSat,"月命殺");addT(getTeki,"月命的殺");addT(saiha,"歳破");
-  const yg=ORD_DIR.filter(p=>good.includes(p)).map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join(""),yb=ORD_DIR.filter(p=>ytypes[p]).flatMap(p=>ytypes[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
+  const yg=ORD_DIR.filter(p=>good.includes(p)).map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join(""),yb=badList(ytypes);
   const yearDirs=DIRS.errors.length?"":fold("ygood",tx("h_good"),yg?`<ul class="dl">${yg}</ul>`:`<p>${tx("good_none")}</p>`,false)+fold("ybad",tx("h_bad"),yb?`<ul class="dl">${yb}</ul>`:`<p>${tx("bad_none")}</p>`,false);
   const fortuneCard=fold("fortune",tx("h_fortune_all",{year:BY}),`<h4>${tx("h_year",{year:BY,palace:pos,title:f.t})} <span class="stars" aria-label="${f.r}／5">${"★".repeat(f.r)}${"☆".repeat(5-f.r)}</span></h4><p>${f.s}</p>`+C.categories.map(c=>`<h4>${tx("h_cat",{name:c.name,year:BY})}</h4><p>${esc(c.text[pos])}</p>`).join(""),true);
   const yr=Array.from({length:12},(_,k)=>{const mp=find(place(monthStar(BY,k)),honmeiStar);return `<li${k===TI?' class="now"':""}><span class="mo">${((k+1)%12)+1}月</span><span class="pl">${mp}</span><span>${C.yearly.palaceMonth[mp].t}</span></li>`}).join("");
@@ -429,7 +431,7 @@ function renderDirs(n,k){
   if(nav){nav.hidden=false;$("mtxt").textContent=tx("h_dir")+"："+mm+"月";
     $("mprev").setAttribute("aria-disabled",k<=0);$("mnext").setAttribute("aria-disabled",k>=11)}
   const gl=good.map(p=>`<li><b>${tx("dir_good_item",{dir:DIR[p],star:ST(pl[p]).name})}</b><br>${goodText(DIRS.good[pl[p]-1])}</li>`).join("");
-  const bl=ORD_DIR.filter(p=>types[p]).flatMap(p=>types[p].map(tp=>`<li><b>${tx("dir_bad_item",{dir:DIR[p],type:tp})}</b><br><span class="pl">${esc(DIRS.bad[tp])}</span></li>`)).join("");
+  const bl=badList(types);
   const chip=(p,c,lb)=>`<span class="chip ${c}"><span class="sr">${lb}</span>${DIR[p]}</span>`; // 色だけに頼らないよう、読み上げ用に「吉」「凶」を添える
   const all=Array.from({length:12},(_,j)=>{const r=monthDirs(n,j),cs=r.good.map(p=>chip(p,"g",tx("dir_lbl_good"))).concat(ORD_DIR.filter(p=>r.types[p]).map(p=>chip(p,"b",tx("dir_lbl_bad"))));
     return `<tr${j===k?' class="now"':""}><th scope="row">${mLabel(j)}月</th><td>${cs.length?`<div class="chips">${cs.join("")}</div>`:`<span class="none">－</span>`}</td></tr>`}).join("");
